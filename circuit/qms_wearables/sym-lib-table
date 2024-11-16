@@ -2,4 +2,5 @@
   (version 7)
   (lib (name "SEN-11574")(type "KiCad")(uri "${KIPRJMOD}/libraries/SEN_11574/SEN-11574.kicad_sym")(options "")(descr ""))
   (lib (name "ESP32-DEVKIT-V1")(type "KiCad")(uri "${KIPRJMOD}/libraries/ESP32-DEVKIT-V1/ESP32-DEVKIT-V1.kicad_sym")(options "")(descr ""))
+  (lib (name "MPU6050_MODULE")(type "KiCad")(uri "${KIPRJMOD}/libraries/MPU6050_MODULE/module_mpu6050.kicad_sym")(options "")(descr ""))
 )
