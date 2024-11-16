@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "LCD 16x4(16x2) Display")(type "KiCad")(uri "${KIPRJMOD}/Libraries/LCD 16x4(16x2) display")(options "")(descr ""))
+)
