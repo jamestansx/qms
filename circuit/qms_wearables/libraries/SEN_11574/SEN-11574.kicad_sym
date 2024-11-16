@@ -1,0 +1,46 @@
+
+(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)
+  (symbol "SEN-11574" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+    (property "Reference" "P" (id 0) (at 0.0 5.59577 0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Value" "SEN-11574" (id 1) (at 0.0 -7.64292 0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Footprint" "SEN-11574:XDCR_SEN-11574" (id 2) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MANUFACTURER" "Sparkfun Electronics" (id 4) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (symbol "SEN-11574_0_0"
+      (rectangle (start -8.881784197e-16 -5.08) (end 12.7 5.08)
+        (stroke (width 0.254)) (fill (type background))
+      )
+      (pin power_in line (at -5.08 0.0 0) (length 5.08)
+        (name "V+"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "2"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin bidirectional line (at -5.08 -2.54 0) (length 5.08)
+        (name "SIGNAL"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "1"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin power_in line (at -5.08 2.54 0) (length 5.08)
+        (name "GND"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "3"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+  )
+)
