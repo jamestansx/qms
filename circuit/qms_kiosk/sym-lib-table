@@ -1,4 +1,5 @@
 (sym_lib_table
   (version 7)
   (lib (name "LCD 16x4(16x2) Display")(type "KiCad")(uri "${KIPRJMOD}/Libraries/LCD 16x4(16x2) display/LCD2X16.kicad_sym")(options "")(descr ""))
+  (lib (name "ESP32-CAM")(type "KiCad")(uri "${KIPRJMOD}/Libraries/ESP32-CAM/ESP32-CAM.kicad_sym")(options "")(descr ""))
 )
