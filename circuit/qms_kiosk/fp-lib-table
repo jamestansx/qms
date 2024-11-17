@@ -2,4 +2,5 @@
   (version 7)
   (lib (name "LCD 16x4(16x2) Display")(type "KiCad")(uri "${KIPRJMOD}/Libraries/LCD 16x4(16x2) display")(options "")(descr ""))
   (lib (name "ESP32-CAM")(type "KiCad")(uri "${KIPRJMOD}/Libraries/ESP32-CAM")(options "")(descr ""))
+  (lib (name "Board Module Port I2C for LCD")(type "KiCad")(uri "${KIPRJMOD}/Libraries/Board Module Port I2C for LCD")(options "")(descr ""))
 )
