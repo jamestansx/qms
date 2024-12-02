@@ -16,3 +16,4 @@ Cargo.lock
 # SQLite database for testing purpose
 *.db
 *.sqlx
+.env

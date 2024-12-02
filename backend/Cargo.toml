@@ -5,12 +5,11 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.93"
-axum = { version = "0.7.9", features = ["macros", "ws"] }
+axum = { version = "0.7.9", features = ["ws", "macros"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
-sqlx = { version = "0.8.2", features = ["runtime-tokio", "sqlite", "chrono"] }
+sqlx = { version = "0.8.2", features = ["chrono", "runtime-tokio", "sqlite", "tls-rustls"] }
 tokio = { version = "1.41.1", features = ["full"] }
-tower-http = { version = "0.6.2", features = ["catch-panic"] }
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
