@@ -1,4 +1,6 @@
 use axum::{extract::State, Json};
+use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::query_as;
 
 use crate::{
@@ -7,9 +9,17 @@ use crate::{
     states::AppState,
 };
 
+#[derive(Deserialize)]
+pub struct RegPatientReq {
+    first_name: String,
+    last_name: String,
+    username: String,
+    date_of_birth: NaiveDate,
+}
+
 pub async fn register_patient(
     State(state): State<AppState>,
-    Json(user): Json<Patient>,
+    Json(user): Json<RegPatientReq>,
 ) -> Result<Json<Patient>, AppError> {
     let patient = query_as!(
         Patient,
@@ -29,9 +39,15 @@ pub async fn register_patient(
     Ok(Json(patient))
 }
 
+#[derive(Deserialize)]
+pub struct RegAppointmentReq {
+    patient_id: u16,
+    scheduled_at_utc: NaiveDateTime,
+}
+
 pub async fn register_appointment(
     State(state): State<AppState>,
-    Json(appointment): Json<Appointment>,
+    Json(appointment): Json<RegAppointmentReq>,
 ) -> Result<Json<Appointment>, AppError> {
     let appointment = query_as!(
         Appointment,
