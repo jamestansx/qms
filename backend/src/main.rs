@@ -1,14 +1,16 @@
 mod errors;
 mod handlers;
 mod models;
+mod queue;
 mod routes;
 mod states;
 
-use std::str::FromStr;
+use std::{str::FromStr, sync::RwLock};
 
+use priority_queue::PriorityQueue;
 use routes::create_router;
 use sqlx::{migrate, sqlite::SqliteConnectOptions, SqlitePool};
-use states::AppState;
+use states::{AppState, Queue};
 use tracing::info;
 
 const DB_HOST: &str = "sqlite://database.db";
@@ -17,8 +19,9 @@ const DB_HOST: &str = "sqlite://database.db";
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let pool = init_db(DB_HOST).await?;
-    let state = AppState { db: pool };
+    let db = init_db(DB_HOST).await?;
+    let queue = Queue::new(RwLock::new(PriorityQueue::default()));
+    let state = AppState { db, queue };
     let app = create_router(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
