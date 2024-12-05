@@ -11,6 +11,7 @@ use priority_queue::PriorityQueue;
 use routes::create_router;
 use sqlx::{migrate, sqlite::SqliteConnectOptions, SqlitePool};
 use states::{AppState, Queue};
+use tokio::sync::broadcast;
 use tracing::info;
 
 const DB_HOST: &str = "sqlite://database.db";
@@ -21,7 +22,13 @@ async fn main() -> anyhow::Result<()> {
 
     let db = init_db(DB_HOST).await?;
     let queue = Queue::new(RwLock::new(PriorityQueue::default()));
-    let state = AppState { db, queue };
+    let (tx, _rx) = broadcast::channel(100);
+    let state = AppState {
+        db,
+        queue,
+        tx,
+        queue_no: RwLock::new(usize::default()).into(),
+    };
     let app = create_router(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;

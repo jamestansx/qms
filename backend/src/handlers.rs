@@ -1,5 +1,13 @@
-use axum::{extract::State, Json};
+use std::convert::Infallible;
+
+use async_stream::try_stream;
+use axum::{
+    extract::State,
+    response::{sse::Event, Sse},
+    Json,
+};
 use chrono::{Datelike, NaiveDate, NaiveDateTime, Utc};
+use futures::stream::Stream;
 use serde::Deserialize;
 use sqlx::{query_as, FromRow};
 
@@ -89,15 +97,33 @@ pub async fn add_to_queue(
     .fetch_one(&state.db)
     .await?;
 
+    let mut queue_no = state.queue_no.write().unwrap();
+
+    *queue_no += 1;
+
     state.queue.write().unwrap().push(
         appointment.patient.clone(),
         QueuePriority {
-            queue_number: 1,
+            queue_number: *queue_no,
             age: (Utc::now().year() - appointment.patient.date_of_birth.year()) as usize,
             appointment_time: appointment.appointment.scheduled_at_utc,
         },
     );
 
     println!("{:?}", state.queue.read().unwrap());
+    let _ = state.tx.send(format!("{:?}", state.queue.read().unwrap()));
     Ok(())
+}
+
+pub async fn queue_status(
+    State(state): State<AppState>,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let mut rx = state.tx.subscribe();
+
+    Sse::new(try_stream! {
+        loop {
+            let recv = rx.recv().await.unwrap();
+            yield Event::default().data(recv);
+        }
+    })
 }
