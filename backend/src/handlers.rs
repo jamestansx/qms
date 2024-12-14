@@ -9,7 +9,7 @@ use axum::{
 use chrono::{Datelike, NaiveDate, NaiveDateTime, Utc};
 use futures::stream::Stream;
 use serde::Deserialize;
-use sqlx::{query_as, FromRow};
+use sqlx::{query, query_as, FromRow};
 
 use crate::{
     errors::AppError,
@@ -19,30 +19,55 @@ use crate::{
 };
 
 #[derive(Deserialize)]
-pub struct RegPatientReq {
+pub struct RegisterPatient {
     first_name: String,
     last_name: String,
     username: String,
+    password: String,
     date_of_birth: NaiveDate,
 }
 
 pub async fn register_patient(
     State(state): State<AppState>,
-    Json(user): Json<RegPatientReq>,
-) -> Result<Json<Patient>, AppError> {
-    let patient = query_as::<_, Patient>(
-        "INSERT INTO patients (first_name, last_name, username, date_of_birth)
-        VALUES (?, ?, ?, ?)
-        RETURNING *",
+    Json(user): Json<RegisterPatient>,
+) -> Result<Json<i64>, AppError> {
+    let record = query!(
+        "INSERT INTO patients (first_name, last_name, username, date_of_birth, password)
+        VALUES (?, ?, ?, ?, ?)
+        RETURNING id",
+        user.first_name,
+        user.last_name,
+        user.username,
+        user.date_of_birth,
+        user.password
     )
-    .bind(user.first_name)
-    .bind(user.last_name)
-    .bind(user.username)
-    .bind(user.date_of_birth)
     .fetch_one(&state.db)
     .await?;
 
-    Ok(Json(patient))
+    Ok(Json(record.id))
+}
+
+#[derive(Deserialize)]
+pub struct LoginPatient {
+    username: String,
+    password: String,
+}
+
+pub async fn login_patient(
+    State(state): State<AppState>,
+    Json(user): Json<LoginPatient>,
+) -> Result<Json<i64>, AppError> {
+    let record = query!(
+        "SELECT id FROM patients
+        WHERE username = ? AND password = ?
+        LIMIT 1",
+        user.username,
+        user.password,
+    )
+    .fetch_one(&state.db)
+    .await?;
+
+    Ok(Json(record.id))
 }
 
 #[derive(Deserialize)]

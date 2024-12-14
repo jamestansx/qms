@@ -8,6 +8,7 @@ pub struct Patient {
     pub username: String,
     pub first_name: String,
     pub last_name: String,
+    pub password: String,
     pub date_of_birth: NaiveDate,
 }
 
