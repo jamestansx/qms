@@ -25,9 +25,10 @@ int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
 // Thresholds for fall detection (adjust based on real-world tests)
-const float LFT_ACC = 1.2;  // Lower fall threshold for acceleration (g)
-const float UFT_ACC = 1.5;  // Upper fall threshold for acceleration (g)
-const float UFT_W = 150.0;  // Upper fall threshold for angular velocity (deg/s)
+const float LFT_ACC = 1.4;  // Lower fall threshold for acceleration (g)
+const float UFT_ACC = 1.8;  // Upper fall threshold for acceleration (g)
+const float UFT_W = 170.0;  // Upper fall threshold for angular velocity (deg/s)
+unsigned long prev_time = 0;
 
 // Sampling interval (adjust for your setup)
 const int SAMPLE_INTERVAL = 500; // milliseconds
@@ -75,6 +76,8 @@ void setup() {
 }
 
 void loop() {
+  unsigned long curr_time = millis();
+  
   // Ensure MQTT connection
   if (!mqttClient.connected()) {
     reconnectMQTT();
@@ -86,12 +89,21 @@ void loop() {
   
   accMagnitude = computeMagnitude(ax, ay, az) / 16384.0;  // Calculate acceleration magnitude in g (assuming 1 unit = 16384 LSB for MPU6050)
   angularVelocity = computeMagnitude(gx, gy, gz) / 131.0;  // Calculate angular velocity magnitude in deg/s (assuming 1 unit = 131 LSB for MPU6050)
-
+  
+  // Check upper thresholds
+    Serial.print("ACC: ");
+    Serial.print(accMagnitude);
+    Serial.print("          ");
+    Serial.print("ang: ");
+    Serial.print(angularVelocity);
   // Apply fall detection algorithm
+  
   if (accMagnitude > LFT_ACC) { // Check lower fall threshold
     Serial.println("Potential fall detected! Verifying...");
-    delay(500); // Delay for second reading (as per the flowchart)
-    // Recalculate acceleration and angular velocity after delay
+
+    if (curr_time - prev_time >= 500){
+      prev_time = curr_time;
+    }
     mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     accMagnitude = computeMagnitude(ax, ay, az) / 16384.0;
     angularVelocity = computeMagnitude(gx, gy, gz) / 131.0;
