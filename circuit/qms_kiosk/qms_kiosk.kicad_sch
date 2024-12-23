@@ -3145,7 +3145,7 @@
 				)
 			)
 		)
-		(property "Footprint" "LCD2X16:LCD_LCD2X16"
+		(property "Footprint" "LCD 16x4(16x2) Display:LCD_LCD2X16"
 			(at 107.95 72.39 0)
 			(effects
 				(font
