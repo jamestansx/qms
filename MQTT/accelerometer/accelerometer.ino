@@ -11,6 +11,8 @@ const char* password = "112233DT";       // Replace with your Wi-Fi password.
 // MQTT Configuration
 const char* mqtt_server = "192.168.0.7"; // Replace with your MQTT broker IP address.
 const int mqtt_port = 1883;              // Default MQTT port.
+const char* mqtt_topic_accMag = "accelerometer/accMag";
+const char* mqtt_topic_angular = "accelerometer/ang";
 const char* mqtt_topic_fall = "accelerometer/fall";      // Topic for fall detection.
 
 WiFiClient espClient;
@@ -19,6 +21,8 @@ PubSubClient mqttClient(espClient);
 // MPU6050 Configuration
 #define SDA_PIN 21
 #define SCL_PIN 22
+
+bool fallDetected = false;
 
 // Variables for accelerometer and gyroscope readings
 int16_t ax, ay, az;
@@ -96,6 +100,16 @@ void loop() {
     Serial.print("          ");
     Serial.print("ang: ");
     Serial.print(angularVelocity);
+    
+    
+    char payload_fall_data_acc [50];
+    snprintf(payload_fall_data_acc, 50, "{\"accMagnitude\": %f}", accMagnitude); // Format data as JSON
+    mqttClient.publish(mqtt_topic_accMag, payload_fall_data_acc);
+
+    char payload_fall_data_angular [50];
+    snprintf(payload_fall_data_angular, 50, "{\"angularVelocity\": %f}", angularVelocity); // Format data as JSON
+    mqttClient.publish(mqtt_topic_angular, payload_fall_data_angular);
+  
   // Apply fall detection algorithm
   
   if (accMagnitude > LFT_ACC) { // Check lower fall threshold
