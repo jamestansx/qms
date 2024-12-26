@@ -3,4 +3,7 @@
   (lib (name "SEN_11574")(type "KiCad")(uri "${KIPRJMOD}/libraries/SEN_11574")(options "")(descr ""))
   (lib (name "ESP32-DEVKIT-V1")(type "KiCad")(uri "${KIPRJMOD}/libraries/ESP32-DEVKIT-V1")(options "")(descr ""))
   (lib (name "MPU6050_MODULE")(type "KiCad")(uri "${KIPRJMOD}/libraries/MPU6050_MODULE")(options "")(descr ""))
+  (lib (name "KK254_MOLEX_2_PIN")(type "KiCad")(uri "${KIPRJMOD}/libraries/KK254_Molex_2_pin_2.54mm")(options "")(descr ""))
+  (lib (name "BK-18650-PC4")(type "KiCad")(uri "${KIPRJMOD}/libraries/BK-18650-PC4-1")(options "")(descr ""))
+  (lib (name "DPST_slide_switch")(type "KiCad")(uri "${KIPRJMOD}/libraries/DPST_slide_switch")(options "")(descr ""))
 )
