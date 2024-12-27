@@ -1,0 +1,8 @@
+CREATE TABLE patients (
+	patient_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	username VARCHAR NOT NULL UNIQUE,
+	first_name VARCHAR NOT NULL,
+	last_name VARCHAR NOT NULL,
+	password VARCHAR NOT NULL,
+	date_of_birth DATE NOT NULL
+);

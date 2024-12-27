@@ -1,37 +1,37 @@
-use std::cmp::Ordering;
+use std::cmp::{self, Ordering};
 
-use chrono::{NaiveDateTime, Utc};
+use chrono::{Duration, NaiveDateTime, Utc};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 pub struct QueuePriority {
-    pub queue_number: usize,
+    pub queue_no: usize,
     pub age: usize,
-    pub appointment_time: NaiveDateTime,
+    pub appointment_time_utc: NaiveDateTime,
 }
 
 impl Ord for QueuePriority {
-    fn cmp(&self, other: &Self) -> Ordering {
-        // compare if patient is elderly
-        if self.age >= 65 {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        let elder = (self.age >= 65, other.age >= 65);
+        if elder.0 && !elder.1 {
             return Ordering::Greater;
-        } else if other.age >= 65 {
+        } else if elder.1 && !elder.0 {
             return Ordering::Less;
         }
 
-        // compare if appointment time is closer to current time
         let current_time = Utc::now().naive_utc();
-        if let Ordering::Greater =
-            (current_time - self.appointment_time).cmp(&(current_time - other.appointment_time))
-        {
+        let range_limit = current_time + Duration::hours(1);
+        if self.appointment_time_utc > range_limit {
+            return Ordering::Less;
+        } else if other.appointment_time_utc > range_limit {
             return Ordering::Greater;
-        };
+        }
 
-        self.queue_number.cmp(&other.queue_number)
+        other.queue_no.cmp(&self.queue_no)
     }
 }
 
 impl PartialOrd for QueuePriority {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
