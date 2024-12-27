@@ -1,0 +1,15 @@
+# FVM Version Cache
+.fvm/
+
+# pub package
+.dart_tool/
+build/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Mac
+.DS_Store
