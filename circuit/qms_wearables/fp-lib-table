@@ -6,4 +6,5 @@
   (lib (name "KK254_MOLEX_2_PIN")(type "KiCad")(uri "${KIPRJMOD}/libraries/KK254_Molex_2_pin_2.54mm")(options "")(descr ""))
   (lib (name "BK-18650-PC4")(type "KiCad")(uri "${KIPRJMOD}/libraries/BK-18650-PC4-1")(options "")(descr ""))
   (lib (name "DPST_slide_switch")(type "KiCad")(uri "${KIPRJMOD}/libraries/DPST_slide_switch")(options "")(descr ""))
+  (lib (name "Vibration_Motor_Module")(type "KiCad")(uri "${KIPRJMOD}/libraries/Vibration Motor Module")(options "")(descr ""))
 )

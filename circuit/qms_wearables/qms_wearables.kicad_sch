@@ -1860,6 +1860,137 @@
 				)
 			)
 		)
+		(symbol "Vibration_Motor_Module:Vibration_Motor_Module"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "P"
+				(at 0 5.5958 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" "Vibration Motor Module"
+				(at 0 -7.6429 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vibration_Motor_Module:XDCR_Vibration_Motor_Module"
+				(at 8.128 8.89 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify bottom)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "MANUFACTURER" "Sparkfun Electronics"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify bottom)
+					(hide yes)
+				)
+			)
+			(symbol "Vibration_Motor_Module_0_0"
+				(rectangle
+					(start 0 -5.08)
+					(end 12.7 5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin bidirectional line
+					(at -5.08 -2.54 0)
+					(length 5.08)
+					(name "SIGNAL"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -5.08 0 0)
+					(length 5.08)
+					(name "V+"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -5.08 2.54 0)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "power:+3.3V"
 			(power)
 			(pin_numbers hide)
@@ -2078,8 +2209,112 @@
 		)
 	)
 	(no_connect
+		(at 104.14 68.58)
+		(uuid "02067549-e9d1-447e-abeb-9bf55fcd7945")
+	)
+	(no_connect
+		(at 104.14 73.66)
+		(uuid "0c1ef277-2812-4812-a4c4-53fc089dbd0d")
+	)
+	(no_connect
+		(at 104.14 99.06)
+		(uuid "12a1047e-5fbd-43c3-91d3-5f451ce9d66f")
+	)
+	(no_connect
 		(at 143.51 30.48)
 		(uuid "1f0f33a8-3fd3-462a-b4a3-9d7f7e542aa1")
+	)
+	(no_connect
+		(at 134.62 73.66)
+		(uuid "25158262-bf2d-4517-8c95-acd347159405")
+	)
+	(no_connect
+		(at 134.62 76.2)
+		(uuid "2b2793d7-c337-4abc-ae6f-aabaae95556c")
+	)
+	(no_connect
+		(at 104.14 106.68)
+		(uuid "38a6afdf-c222-4023-8a46-34e423c73470")
+	)
+	(no_connect
+		(at 134.62 104.14)
+		(uuid "3f753ce2-69fc-49c9-9134-3b6ce1cbd700")
+	)
+	(no_connect
+		(at 104.14 93.98)
+		(uuid "3f8bfd8f-ce86-4a67-a7ff-3fa9f6c8ff88")
+	)
+	(no_connect
+		(at 134.62 106.68)
+		(uuid "4594b8d6-42e8-4eab-a80b-4ab5784f2214")
+	)
+	(no_connect
+		(at 104.14 76.2)
+		(uuid "5380e265-d31f-4459-8775-1a49be7958e1")
+	)
+	(no_connect
+		(at 104.14 104.14)
+		(uuid "5fd60aca-fa87-4dae-8640-9548a953a8c6")
+	)
+	(no_connect
+		(at 163.83 110.49)
+		(uuid "6546d637-71ec-4686-9781-76da1b697316")
+	)
+	(no_connect
+		(at 134.62 96.52)
+		(uuid "80a4fc6d-c8aa-40bb-a8ba-3f068296c577")
+	)
+	(no_connect
+		(at 163.83 107.95)
+		(uuid "8dae908b-e596-44c2-b5a8-2edbb6509960")
+	)
+	(no_connect
+		(at 104.14 88.9)
+		(uuid "a0a6ccc3-f2ae-47ac-aa49-b4116b49c4d0")
+	)
+	(no_connect
+		(at 134.62 93.98)
+		(uuid "a547dfe9-7ce5-4b2a-8e35-a4c7c181bd30")
+	)
+	(no_connect
+		(at 104.14 91.44)
+		(uuid "ab030b57-6520-4445-9841-18014a1daf28")
+	)
+	(no_connect
+		(at 134.62 101.6)
+		(uuid "b7c440c8-55e0-44e5-9964-1ef11312a786")
+	)
+	(no_connect
+		(at 163.83 105.41)
+		(uuid "bac4cde5-d3a8-4025-b89d-ca767179a454")
+	)
+	(no_connect
+		(at 134.62 81.28)
+		(uuid "c188f9f5-cd3c-45ff-bab1-21d668356341")
+	)
+	(no_connect
+		(at 134.62 83.82)
+		(uuid "c813a5b4-ecd3-4da8-8c73-5406830c1a6b")
+	)
+	(no_connect
+		(at 104.14 101.6)
+		(uuid "c9eb2adc-9e34-45ba-8089-eba57f987071")
+	)
+	(no_connect
+		(at 104.14 109.22)
+		(uuid "ccd46fda-8748-4298-83da-4a6b5605cdff")
+	)
+	(no_connect
+		(at 134.62 99.06)
+		(uuid "d52ee14e-a9ea-481f-86a6-0b2837148454")
+	)
+	(no_connect
+		(at 104.14 96.52)
+		(uuid "dfc74268-4596-445c-8948-348e0bb6e3f4")
+	)
+	(no_connect
+		(at 163.83 113.03)
+		(uuid "fd09b7b4-5eba-49bc-8333-1585758be41e")
 	)
 	(wire
 		(pts
@@ -2233,7 +2468,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 101.6) (xy 83.82 101.6)
+			(xy 77.47 101.6) (xy 83.82 101.6)
 		)
 		(stroke
 			(width 0)
@@ -2383,7 +2618,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 99.06) (xy 90.17 99.06)
+			(xy 77.47 99.06) (xy 90.17 99.06)
 		)
 		(stroke
 			(width 0)
@@ -2483,7 +2718,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 104.14) (xy 83.82 104.14)
+			(xy 77.47 104.14) (xy 83.82 104.14)
 		)
 		(stroke
 			(width 0)
@@ -2652,88 +2887,6 @@
 			(project "qms_wearables"
 				(path "/81221e85-c470-4436-ab82-7fff3486476b"
 					(reference "#PWR04")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "SEN-11574:SEN-11574")
-		(at 74.93 101.6 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "06b4c60e-f104-439d-8dc1-28e2a6b739c7")
-		(property "Reference" "P2"
-			(at 68.58 91.44 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "PWM VIBRATION MOTOR"
-			(at 68.58 93.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "SEN_11574:XDCR_SEN-11574"
-			(at 74.93 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 74.93 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 74.93 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MANUFACTURER" "Sparkfun Electronics"
-			(at 74.93 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "7520b1e9-47d0-411a-8043-5961c91d7b13")
-		)
-		(pin "3"
-			(uuid "7ff1f44b-f495-47d8-bc8d-a0545ca968fc")
-		)
-		(pin "2"
-			(uuid "b03ad1a7-bddf-4ec3-aae0-698f1243c0ee")
-		)
-		(instances
-			(project "qms_wearables"
-				(path "/81221e85-c470-4436-ab82-7fff3486476b"
-					(reference "P2")
 					(unit 1)
 				)
 			)
@@ -3620,6 +3773,88 @@
 			(project ""
 				(path "/81221e85-c470-4436-ab82-7fff3486476b"
 					(reference "BT1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vibration_Motor_Module:Vibration_Motor_Module")
+		(at 72.39 101.6 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7fcf6a4d-a0e9-4aab-b050-c7a3250b9caa")
+		(property "Reference" "P2"
+			(at 66.04 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Vibration Motor Module"
+			(at 66.04 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Vibration_Motor_Module:XDCR_Vibration_Motor_Module"
+			(at 64.262 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 72.39 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 72.39 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MANUFACTURER" "Sparkfun Electronics"
+			(at 72.39 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "71480bbd-cefc-431e-9e1e-e432321b413b")
+		)
+		(pin "2"
+			(uuid "6722d8f1-8e5e-4598-bc1a-1eb6c6acdd73")
+		)
+		(pin "3"
+			(uuid "0edba9b7-29d3-4f0c-93a8-72ce048d40f5")
+		)
+		(instances
+			(project ""
+				(path "/81221e85-c470-4436-ab82-7fff3486476b"
+					(reference "P2")
 					(unit 1)
 				)
 			)

@@ -1,9 +1,10 @@
 (sym_lib_table
   (version 7)
-  (lib (name "SEN-11574")(type "KiCad")(uri "${KIPRJMOD}/libraries/SEN_11574/SEN-11574.kicad_sym")(options "")(descr ""))
+  (lib (name "SEN-11574")(type "KiCad")(uri "${KIPRJMOD}/libraries/SEN_11574/SEN_11574.kicad_sym")(options "")(descr ""))
   (lib (name "ESP32-DEVKIT-V1")(type "KiCad")(uri "${KIPRJMOD}/libraries/ESP32-DEVKIT-V1/ESP32-DEVKIT-V1.kicad_sym")(options "")(descr ""))
   (lib (name "MPU6050_MODULE")(type "KiCad")(uri "${KIPRJMOD}/libraries/MPU6050_MODULE/module_mpu6050.kicad_sym")(options "")(descr ""))
   (lib (name "KK254_MOLEX_2_PIN")(type "KiCad")(uri "${KIPRJMOD}/libraries/KK254_Molex_2_pin_2.54mm/MTSW-102-07-G-S-200.kicad_sym")(options "")(descr ""))
   (lib (name "BK-18650-PC4")(type "KiCad")(uri "${KIPRJMOD}/libraries/BK-18650-PC4-1/BK-18650-PC4.kicad_sym")(options "")(descr ""))
   (lib (name "DPST_slide_switch")(type "KiCad")(uri "${KIPRJMOD}/libraries/DPST_slide_switch/EG1218.kicad_sym")(options "")(descr ""))
+  (lib (name "Vibration_Motor_Module")(type "KiCad")(uri "${KIPRJMOD}/libraries/Vibration Motor Module/Vibration_Motor_Module.kicad_sym")(options "")(descr ""))
 )
