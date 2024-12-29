@@ -90,7 +90,6 @@ pub async fn register_queue(
         .insert(params.uuid, tx);
 
     Ok(Sse::new(try_stream! {
-        yield Event::default();
         let queue_no = rx.recv().await;
 
         if let Ok(queue_no) = queue_no {

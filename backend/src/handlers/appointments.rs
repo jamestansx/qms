@@ -11,10 +11,10 @@ pub async fn list_appointments(
     Path(patient_id): Path<i64>,
 ) -> Result<Json<Vec<AppointmentModel>>, AppError> {
     let appointments: Vec<AppointmentModel> = query_as(
-        "SELECT (appointment_id, patient_id, scheduled_at_utc, uuid AS 'uuid: uuid::Uuid')
+        r#"SELECT *
         FROM appointments
         WHERE patient_id = ?
-        ORDER BY scheduled_at_utc ASC",
+        ORDER BY scheduled_at_utc ASC"#,
     )
     .bind(patient_id)
     .fetch_all(&state.db)
