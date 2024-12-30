@@ -3,6 +3,7 @@ CREATE TABLE appointments (
 	uuid VARCHAR UNIQUE NOT NULL,
 	patient_id INTEGER NOT NULL,
 	scheduled_at_utc DATETIME NOT NULL,
+	is_attended BOOLEAN DEFAULT false NOT NULL,
 	FOREIGN KEY(patient_id) REFERENCES patients(patient_id)
 	ON DELETE CASCADE
 	ON UPDATE NO ACTION

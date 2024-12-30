@@ -1,4 +1,7 @@
-use std::{convert::Infallible, sync::atomic::Ordering};
+use std::{
+    convert::Infallible,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use async_stream::try_stream;
 use axum::{
@@ -6,6 +9,7 @@ use axum::{
     response::{sse::Event, Sse},
     Json,
 };
+use chrono::NaiveDateTime;
 use futures::Stream;
 use sqlx::{query, query_as};
 use tokio::sync::broadcast;
@@ -14,7 +18,7 @@ use crate::{
     error::AppError,
     models::{patients::PatientModel, queues::RegQueueParams},
     queue::QueuePriority,
-    SharedAppState,
+    SharedAppState, SharedQueue, SharedVerifier,
 };
 
 pub async fn queue_status(
@@ -23,7 +27,7 @@ pub async fn queue_status(
     let mut rx = state.queue.status.subscribe();
 
     Sse::new(try_stream! {
-        yield Event::default().data(format!("{:?}", state.queue.queue.read().unwrap()));
+        yield Event::default().data(format!("{:?}", state.queue.queue.read().unwrap().peek().and_then(|x| Some(x.1.queue_no))));
         loop {
             let recv = rx.recv().await;
             if let Ok(recv) = recv {
@@ -35,12 +39,39 @@ pub async fn queue_status(
     })
 }
 
+fn update_queue(
+    verifier: SharedVerifier,
+    uuid: uuid::Uuid,
+    next_queue_no: &AtomicUsize,
+    queue: SharedQueue,
+    age: usize,
+    scheduled_at_utc: NaiveDateTime,
+) {
+    let tx = verifier.read().unwrap();
+    let tx = tx.get(&uuid);
+
+    if let Some(tx) = tx {
+        let queue_no = next_queue_no.load(Ordering::Relaxed);
+        queue.write().unwrap().push(
+            uuid.to_string(),
+            QueuePriority {
+                queue_no,
+                age,
+                appointment_time_utc: scheduled_at_utc,
+            },
+        );
+        if let Ok(_) = tx.send(format!("{}", queue_no)) {
+            next_queue_no.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+}
+
 pub async fn verify_queue(
     State(state): State<SharedAppState>,
     Json(params): Json<RegQueueParams>,
 ) -> Result<(), AppError> {
     let res = query!(
-        "SELECT patient_id, scheduled_at_utc, uuid as 'uuid: uuid::Uuid'
+        "SELECT appointment_id, patient_id, scheduled_at_utc, uuid as 'uuid: uuid::Uuid'
         FROM appointments
         WHERE uuid = ?",
         params.uuid
@@ -56,23 +87,21 @@ pub async fn verify_queue(
     .fetch_one(&state.db)
     .await?;
 
-    let tx = state.queue.verifier.read().unwrap();
-    let tx = tx.get(&res.uuid);
+    update_queue(
+        state.queue.verifier.clone(),
+        params.uuid,
+        &state.queue.next_queue_no,
+        state.queue.queue.clone(),
+        patient.age(),
+        res.scheduled_at_utc,
+    );
 
-    if let Some(tx) = tx {
-        let queue_no = state.queue.next_queue_no.load(Ordering::Relaxed);
-        state.queue.queue.write().unwrap().push(
-            params.uuid.to_string(),
-            QueuePriority {
-                queue_no,
-                age: patient.age(),
-                appointment_time_utc: res.scheduled_at_utc,
-            },
-        );
-        if let Ok(_) = tx.send(format!("{}", queue_no)) {
-            state.queue.next_queue_no.fetch_add(1, Ordering::Relaxed);
-        };
-    }
+    query!(
+        "UPDATE appointments SET is_attended = true WHERE appointment_id = ?",
+        res.appointment_id
+    )
+    .execute(&state.db)
+    .await?;
 
     Ok(())
 }
@@ -104,6 +133,15 @@ pub async fn next_queue(State(state): State<SharedAppState>) {
     state
         .queue
         .status
-        .send(format!("{:?}", state.queue.queue.read().unwrap()))
+        .send(format!(
+            "{:?}",
+            state
+                .queue
+                .queue
+                .read()
+                .unwrap()
+                .peek()
+                .and_then(|x| Some(x.1.queue_no))
+        ))
         .unwrap();
 }
