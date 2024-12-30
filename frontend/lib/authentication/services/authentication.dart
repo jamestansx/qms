@@ -60,8 +60,7 @@ class AuthRepo extends DioClient {
       final Patient patient = Patient.fromJson(response.data);
       _controller.add(AuthStatus.authenticated);
       return patient;
-    } catch (e, stackTrace) {
-      print("Error on login\n $e\n $stackTrace");
+    } catch (_) {
       _controller.add(AuthStatus.failure);
       rethrow;
     }

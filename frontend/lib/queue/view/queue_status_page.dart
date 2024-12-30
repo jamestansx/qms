@@ -1,12 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
 import 'package:qms/queue/services/queue.dart';
 
 class QueueStatusPage extends StatefulWidget {
-  const QueueStatusPage({super.key});
+  const QueueStatusPage({super.key, required this.queueNo});
 
-  static Route<void> route() {
-    return MaterialPageRoute(builder: (_) => QueueStatusPage());
+  final String queueNo;
+
+  static Route<void> route(String queueNo) {
+    return MaterialPageRoute(builder: (_) => QueueStatusPage(queueNo: queueNo));
   }
 
   @override
@@ -15,6 +20,7 @@ class QueueStatusPage extends StatefulWidget {
 
 class _QueueStatusPageState extends State<QueueStatusPage> {
   late final Stream<SSEModel> stream;
+  int? queueNo;
 
   @override
   void initState() {
@@ -39,12 +45,37 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
             return Center(child: CircularProgressIndicator());
           }
 
+          if (snapshot.hasData) {
+            queueNo = jsonDecode(snapshot.data!.data!)["queue_no"];
+          }
+
+          if (queueNo != null && queueNo == int.parse(widget.queueNo)) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text("It's Your TURN, MF")));
+            });
+          }
+
+          if (queueNo == null) {
+            return Center(child: Text("NO QUEUE NOW"));
+          }
+
           return Center(
-            child: Column(
-              children: [
-                Text("Connection State: ${snapshot.connectionState}"),
-                Text("Data: ${snapshot.data?.data}"),
-              ],
+            child: Card.outlined(
+              borderOnForeground: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              margin: EdgeInsets.all(10.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Current Queue Number:"),
+                    Text(queueNo!.toString()),
+                  ],
+                ),
+              ),
             ),
           );
         },

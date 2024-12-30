@@ -11,8 +11,10 @@ use axum::{
 };
 use chrono::NaiveDateTime;
 use futures::Stream;
+use serde_json::json;
 use sqlx::{query, query_as};
-use tokio::sync::broadcast;
+use tokio::sync::broadcast::{self, Sender};
+use tracing::error;
 
 use crate::{
     error::AppError,
@@ -24,15 +26,32 @@ use crate::{
 pub async fn queue_status(
     State(state): State<SharedAppState>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let init_queue_no = state
+        .queue
+        .queue
+        .read()
+        .unwrap()
+        .peek()
+        .and_then(|x| Some(x.1.queue_no));
     let mut rx = state.queue.status.subscribe();
 
     Sse::new(try_stream! {
-        yield Event::default().data(format!("{:?}", state.queue.queue.read().unwrap().peek().and_then(|x| Some(x.1.queue_no))));
+        if let Some(num) = init_queue_no {
+            yield Event::default().data(format!("{}", json!({"queue_no": num}).to_string()));
+        } else {
+            yield Event::default().data(json!({}).to_string());
+        }
+
         loop {
             let recv = rx.recv().await;
             if let Ok(recv) = recv {
-                yield Event::default().data(recv);
+                if recv.is_empty() {
+                    yield Event::default().data(json!({}).to_string());
+                } else {
+                    yield Event::default().data(format!("{}", json!({"queue_no": recv.parse::<usize>().unwrap()}).to_string()));
+                }
             } else {
+                error!("Something's wrong with receiver");
                 break;
             }
         }
@@ -46,13 +65,18 @@ fn update_queue(
     queue: SharedQueue,
     age: usize,
     scheduled_at_utc: NaiveDateTime,
+    status: &Sender<String>,
 ) {
     let tx = verifier.read().unwrap();
     let tx = tx.get(&uuid);
 
     if let Some(tx) = tx {
+        let mut priority_queue = queue.write().unwrap();
+        if priority_queue.get(&uuid.to_string()).is_some() {
+            return;
+        }
         let queue_no = next_queue_no.load(Ordering::Relaxed);
-        queue.write().unwrap().push(
+        priority_queue.push(
             uuid.to_string(),
             QueuePriority {
                 queue_no,
@@ -60,8 +84,13 @@ fn update_queue(
                 appointment_time_utc: scheduled_at_utc,
             },
         );
-        if let Ok(_) = tx.send(format!("{}", queue_no)) {
+        if tx.send(format!("{}", queue_no)).is_ok() {
+            if priority_queue.len() == 1 {
+                status.send(format!("{}", queue_no)).unwrap();
+            }
             next_queue_no.fetch_add(1, Ordering::Relaxed);
+        } else {
+            error!("Unable to send queue number");
         }
     }
 }
@@ -94,6 +123,7 @@ pub async fn verify_queue(
         state.queue.queue.clone(),
         patient.age(),
         res.scheduled_at_utc,
+        &state.queue.status,
     );
 
     query!(
@@ -130,18 +160,19 @@ pub async fn register_queue(
 
 pub async fn next_queue(State(state): State<SharedAppState>) {
     state.queue.queue.write().unwrap().pop();
-    state
-        .queue
-        .status
-        .send(format!(
-            "{:?}",
-            state
-                .queue
-                .queue
-                .read()
-                .unwrap()
-                .peek()
-                .and_then(|x| Some(x.1.queue_no))
-        ))
-        .unwrap();
+    let priority_queue = state.queue.queue.read().unwrap();
+    let q = priority_queue.peek();
+    if let Some(q) = q {
+        state
+            .queue
+            .status
+            .send(format!("{}", q.1.queue_no))
+            .unwrap();
+    } else {
+        state
+            .queue
+            .status
+            .send("".into())
+            .unwrap();
+    }
 }

@@ -54,11 +54,12 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
                       ),
                       actions: [
                         TextButton(
-                          onPressed: () =>
-                              Navigator.pushReplacement<void, void>(
-                            context,
-                            QueueStatusPage.route(),
-                          ),
+                          onPressed: () {
+                            Navigator.pushReplacement<void, void>(
+                              context,
+                              QueueStatusPage.route(snapshot.data!.data!),
+                            );
+                          },
                           child: const Text("Ok"),
                         ),
                       ],
