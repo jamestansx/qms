@@ -7,6 +7,7 @@ use std::{
 
 use axum::{
     extract::{MatchedPath, Request},
+    http::Method,
     Router,
 };
 use priority_queue::PriorityQueue;
@@ -18,7 +19,10 @@ use rumqttc::v5::{
 };
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use tokio::{net::TcpListener, sync::broadcast, task};
-use tower_http::trace::TraceLayer;
+use tower_http::{
+    cors::{Any, CorsLayer},
+    trace::TraceLayer,
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod error;
@@ -100,7 +104,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mqtt_client = task::spawn(async move {
         loop {
             if let Ok(recv) = rx.try_recv() {
-                cl.publish("server/queue", QoS::AtLeastOnce, false, recv).await.ok();
+                cl.publish("server/queue", QoS::AtLeastOnce, false, recv)
+                    .await
+                    .ok();
             }
 
             let notif = event_loop.poll().await;
@@ -118,21 +124,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    let app = Router::new().nest("/api/v1", make_routes(state)).layer(
-        TraceLayer::new_for_http()
-            .make_span_with(|req: &Request| {
-                let method = req.method();
-                let uri = req.uri();
+    let cors = CorsLayer::new()
+        .allow_methods([Method::GET, Method::POST])
+        .allow_origin(Any);
 
-                let matched_path = req
-                    .extensions()
-                    .get::<MatchedPath>()
-                    .map(|matched_path| matched_path.as_str());
+    let app = Router::new()
+        .nest("/api/v1", make_routes(state))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(|req: &Request| {
+                    let method = req.method();
+                    let uri = req.uri();
 
-                tracing::debug_span!("request", %method, %uri, matched_path)
-            })
-            .on_failure(()),
-    );
+                    let matched_path = req
+                        .extensions()
+                        .get::<MatchedPath>()
+                        .map(|matched_path| matched_path.as_str());
+
+                    tracing::debug_span!("request", %method, %uri, matched_path)
+                })
+                .on_failure(()),
+        )
+        .layer(cors);
 
     let listener = TcpListener::bind("0.0.0.0:3000").await?;
     tracing::debug!("listening on {}", listener.local_addr()?);
