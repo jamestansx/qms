@@ -7,4 +7,6 @@
   (lib (name "BK-18650-PC4")(type "KiCad")(uri "${KIPRJMOD}/libraries/BK-18650-PC4-1/BK-18650-PC4.kicad_sym")(options "")(descr ""))
   (lib (name "DPST_slide_switch")(type "KiCad")(uri "${KIPRJMOD}/libraries/DPST_slide_switch/EG1218.kicad_sym")(options "")(descr ""))
   (lib (name "Vibration_Motor_Module")(type "KiCad")(uri "${KIPRJMOD}/libraries/Vibration Motor Module/Vibration_Motor_Module.kicad_sym")(options "")(descr ""))
+  (lib (name "BATTERY-2CELLS-2WIRES")(type "KiCad")(uri "${KIPRJMOD}/libraries/BA2AAW/BA2AAW.kicad_sym")(options "")(descr ""))
+  (lib (name "DPDT-SLIDESWITCH-6PINS")(type "KiCad")(uri "${KIPRJMOD}/libraries/DPDT_slide_switch2/EPS4PC3.kicad_sym")(options "")(descr ""))
 )

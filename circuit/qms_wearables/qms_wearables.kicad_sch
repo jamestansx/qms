@@ -5,7 +5,7 @@
 	(uuid "81221e85-c470-4436-ab82-7fff3486476b")
 	(paper "A4")
 	(lib_symbols
-		(symbol "BK-18650-PC4:BK-18650-PC4"
+		(symbol "BATTERY-2CELLS-2WIRES:BA2AAW"
 			(pin_names
 				(offset 1.016)
 			)
@@ -13,7 +13,7 @@
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "BT"
-				(at -3.81 6.35 0)
+				(at -3.81 3.81 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -21,8 +21,8 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "BK-18650-PC4"
-				(at -3.81 -10.16 0)
+			(property "Value" "BA2AAW"
+				(at -3.81 -5.08 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -30,7 +30,7 @@
 					(justify left bottom)
 				)
 			)
-			(property "Footprint" "BK-18650-PC4:BAT_BK-18650-PC4"
+			(property "Footprint" "BA2AAW:BAT_BA2AAW"
 				(at 0 0 0)
 				(effects
 					(font
@@ -58,7 +58,7 @@
 					(hide yes)
 				)
 			)
-			(property "MF" "MPD"
+			(property "MF" "MPD (Memory"
 				(at 0 0 0)
 				(effects
 					(font
@@ -68,7 +68,7 @@
 					(hide yes)
 				)
 			)
-			(property "MAXIMUM_PACKAGE_HEIGHT" "21.54 mm"
+			(property "MAXIMUM_PACKAGE_HEIGHT" "15.88 mm"
 				(at 0 0 0)
 				(effects
 					(font
@@ -98,7 +98,7 @@
 					(hide yes)
 				)
 			)
-			(property "Check_prices" "https://www.snapeda.com/parts/BK-18650-PC4/MPD/view-part/?ref=eda"
+			(property "Check_prices" "https://www.snapeda.com/parts/BA2AAW/MPD/view-part/?ref=eda"
 				(at 0 0 0)
 				(effects
 					(font
@@ -118,7 +118,7 @@
 					(hide yes)
 				)
 			)
-			(property "PARTREV" "K"
+			(property "PARTREV" "E"
 				(at 0 0 0)
 				(effects
 					(font
@@ -128,7 +128,7 @@
 					(hide yes)
 				)
 			)
-			(property "SnapEDA_Link" "https://www.snapeda.com/parts/BK-18650-PC4/MPD/view-part/?ref=snap"
+			(property "SnapEDA_Link" "https://www.snapeda.com/parts/BA2AAW/MPD/view-part/?ref=snap"
 				(at 0 0 0)
 				(effects
 					(font
@@ -138,7 +138,7 @@
 					(hide yes)
 				)
 			)
-			(property "MP" "BK-18650-PC4"
+			(property "MP" "BA2AAW"
 				(at 0 0 0)
 				(effects
 					(font
@@ -148,7 +148,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description_1" "\n                        \n                            Battery Holder (Open) 18650 2 Cell PC Pin\n                        \n"
+			(property "Description_1" "\n                        \n                            Battery Holder (Open) AA 2 Cell Wire Leads - 6 (152.4mm)\n                        \n"
 				(at 0 0 0)
 				(effects
 					(font
@@ -178,10 +178,10 @@
 					(hide yes)
 				)
 			)
-			(symbol "BK-18650-PC4_0_0"
+			(symbol "BA2AAW_0_0"
 				(polyline
 					(pts
-						(xy -3.81 -3.175) (xy -2.54 -3.175)
+						(xy -3.81 1.905) (xy -2.54 1.905)
 					)
 					(stroke
 						(width 0.254)
@@ -193,7 +193,7 @@
 				)
 				(polyline
 					(pts
-						(xy -3.81 4.445) (xy -2.54 4.445)
+						(xy -3.175 2.54) (xy -3.175 1.27)
 					)
 					(stroke
 						(width 0.254)
@@ -205,10 +205,10 @@
 				)
 				(polyline
 					(pts
-						(xy -3.175 -2.54) (xy -3.175 -3.81)
+						(xy -1.27 0) (xy -2.54 0)
 					)
 					(stroke
-						(width 0.254)
+						(width 0.1524)
 						(type default)
 					)
 					(fill
@@ -217,55 +217,7 @@
 				)
 				(polyline
 					(pts
-						(xy -3.175 5.08) (xy -3.175 3.81)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 -5.08) (xy -2.54 -5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 -5.08) (xy -1.27 -7.62)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 -2.54) (xy -1.27 -5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 2.54) (xy -2.54 2.54)
+						(xy -1.27 0) (xy -1.27 -2.54)
 					)
 					(stroke
 						(width 0.254)
@@ -289,7 +241,7 @@
 				)
 				(polyline
 					(pts
-						(xy -1.27 5.08) (xy -1.27 2.54)
+						(xy 1.27 0) (xy 1.27 -1.27)
 					)
 					(stroke
 						(width 0.254)
@@ -301,7 +253,19 @@
 				)
 				(polyline
 					(pts
-						(xy 1.27 -5.08) (xy 1.27 -6.35)
+						(xy 1.27 0) (xy 2.54 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 0)
 					)
 					(stroke
 						(width 0.254)
@@ -313,55 +277,7 @@
 				)
 				(polyline
 					(pts
-						(xy 1.27 -5.08) (xy 2.54 -5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -3.81) (xy 1.27 -5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 2.54) (xy 1.27 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 2.54) (xy 2.54 2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 3.81) (xy 1.27 2.54)
+						(xy 3.81 1.905) (xy 2.54 1.905)
 					)
 					(stroke
 						(width 0.254)
@@ -372,7 +288,7 @@
 					)
 				)
 				(pin passive line
-					(at -7.62 2.54 0)
+					(at -7.62 0 0)
 					(length 5.08)
 					(name "~"
 						(effects
@@ -381,7 +297,7 @@
 							)
 						)
 					)
-					(number "1+"
+					(number "+"
 						(effects
 							(font
 								(size 1.016 1.016)
@@ -390,7 +306,7 @@
 					)
 				)
 				(pin passive line
-					(at 7.62 2.54 180)
+					(at 7.62 0 180)
 					(length 5.08)
 					(name "~"
 						(effects
@@ -399,43 +315,7 @@
 							)
 						)
 					)
-					(number "1-"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -5.08 0)
-					(length 5.08)
-					(name "~"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-					(number "2+"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -5.08 180)
-					(length 5.08)
-					(name "~"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-					(number "2-"
+					(number "-"
 						(effects
 							(font
 								(size 1.016 1.016)
@@ -445,15 +325,15 @@
 				)
 			)
 		)
-		(symbol "DPST_slide_switch:EG1218"
+		(symbol "DPDT-SLIDESWITCH-6PINS:EPS4PC3"
 			(pin_names
 				(offset 1.016)
 			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" "S"
-				(at -5.08 5.842 0)
+			(property "Reference" "J"
+				(at -2.54 10.16 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -461,16 +341,16 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "EG1218"
-				(at -5.08 -7.62 0)
+			(property "Value" "EPS4PC3"
+				(at -2.54 -10.16 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(justify left bottom)
+					(justify left top)
 				)
 			)
-			(property "Footprint" "EG1218:SW_EG1218"
+			(property "Footprint" "EPS4PC3:SWITCHCRAFT_EPS4PC3"
 				(at 0 0 0)
 				(effects
 					(font
@@ -489,7 +369,16 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Slide Switch SPDT Through Hole"
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "MF" "Switchcraft"
 				(at 0 0 0)
 				(effects
 					(font
@@ -499,27 +388,7 @@
 					(hide yes)
 				)
 			)
-			(property "MF" "E-Switch"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify bottom)
-					(hide yes)
-				)
-			)
-			(property "PACKAGE" "None"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify bottom)
-					(hide yes)
-				)
-			)
-			(property "PRICE" "None"
+			(property "MAXIMUM_PACKAGE_HEIGHT" "16.51 mm"
 				(at 0 0 0)
 				(effects
 					(font
@@ -539,16 +408,6 @@
 					(hide yes)
 				)
 			)
-			(property "Check_prices" "https://www.snapeda.com/parts/EG1218/E-Switch/view-part/?ref=eda"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify bottom)
-					(hide yes)
-				)
-			)
 			(property "Price" "None"
 				(at 0 0 0)
 				(effects
@@ -559,7 +418,7 @@
 					(hide yes)
 				)
 			)
-			(property "SnapEDA_Link" "https://www.snapeda.com/parts/EG1218/E-Switch/view-part/?ref=snap"
+			(property "Check_prices" "https://www.snapeda.com/parts/EPS4PC3/SWITCHCRAFT/view-part/?ref=eda"
 				(at 0 0 0)
 				(effects
 					(font
@@ -569,7 +428,7 @@
 					(hide yes)
 				)
 			)
-			(property "MP" "EG1218"
+			(property "STANDARD" "Manufacturer Recommendations"
 				(at 0 0 0)
 				(effects
 					(font
@@ -579,7 +438,27 @@
 					(hide yes)
 				)
 			)
-			(property "Description_1" "\n                        \n                            Slide Switch, EG Series, SPDT, Non-Shorting, ON-ON, 200mA DC, 30VDC, PC Pin | E-Switch EG1218\n                        \n"
+			(property "SnapEDA_Link" "https://www.snapeda.com/parts/EPS4PC3/SWITCHCRAFT/view-part/?ref=snap"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify bottom)
+					(hide yes)
+				)
+			)
+			(property "MP" "EPS4PC3"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify bottom)
+					(hide yes)
+				)
+			)
+			(property "Description_1" "\n                        \n                            Switch Slide DPDT Recessed Slide 10.1A 250VAC 250VDC PC Pins Panel Mount/Through Hole\n                        \n"
 				(at 0 0 0)
 				(effects
 					(font
@@ -599,7 +478,7 @@
 					(hide yes)
 				)
 			)
-			(property "AVAILABILITY" "In Stock"
+			(property "MANUFACTURER" "Switchcraft"
 				(at 0 0 0)
 				(effects
 					(font
@@ -609,31 +488,10 @@
 					(hide yes)
 				)
 			)
-			(property "PURCHASE-URL" "https://pricing.snapeda.com/search/part/EG1218/?ref=eda"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify bottom)
-					(hide yes)
-				)
-			)
-			(symbol "EG1218_0_0"
-				(rectangle
-					(start -2.54 -5.08)
-					(end 2.54 5.08)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
+			(symbol "EPS4PC3_0_0"
 				(polyline
 					(pts
-						(xy -2.54 -2.54) (xy -1.27 -2.54)
+						(xy -2.54 -5.08) (xy -5.08 -5.08)
 					)
 					(stroke
 						(width 0.1524)
@@ -645,7 +503,7 @@
 				)
 				(polyline
 					(pts
-						(xy -2.54 0) (xy -1.27 0)
+						(xy -2.54 -5.08) (xy 2.794 -2.9464)
 					)
 					(stroke
 						(width 0.1524)
@@ -657,7 +515,7 @@
 				)
 				(polyline
 					(pts
-						(xy -2.54 2.54) (xy -1.27 2.54)
+						(xy -2.54 5.08) (xy -5.08 5.08)
 					)
 					(stroke
 						(width 0.1524)
@@ -669,55 +527,110 @@
 				)
 				(polyline
 					(pts
-						(xy -1.27 -1.905) (xy -1.27 -3.175) (xy 0 -2.54) (xy -1.27 -1.905)
+						(xy -2.54 5.08) (xy 2.794 7.2136)
 					)
 					(stroke
 						(width 0.1524)
 						(type default)
 					)
 					(fill
-						(type outline)
+						(type none)
 					)
 				)
 				(polyline
 					(pts
-						(xy -1.27 0.635) (xy -1.27 -0.635) (xy 0 0) (xy -1.27 0.635)
+						(xy 5.08 -7.62) (xy 2.921 -7.62)
 					)
 					(stroke
 						(width 0.1524)
 						(type default)
 					)
 					(fill
-						(type outline)
+						(type none)
 					)
 				)
 				(polyline
 					(pts
-						(xy -1.27 3.175) (xy -1.27 1.905) (xy 0 2.54) (xy -1.27 3.175)
+						(xy 5.08 -2.54) (xy 2.921 -2.54)
 					)
 					(stroke
 						(width 0.1524)
 						(type default)
 					)
 					(fill
-						(type outline)
+						(type none)
 					)
 				)
 				(polyline
 					(pts
-						(xy 0 1.905) (xy 0 3.175) (xy 1.27 3.175) (xy 1.27 -0.635) (xy 0 -0.635) (xy 0 0.635) (xy 0.635 0.635)
-						(xy 0.635 1.905) (xy 0 1.905)
+						(xy 5.08 2.54) (xy 2.921 2.54)
 					)
 					(stroke
 						(width 0.1524)
 						(type default)
 					)
 					(fill
-						(type outline)
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 5.08 7.62) (xy 2.921 7.62)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.54 -7.62)
+					(radius 0.3302)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.54 -2.54)
+					(radius 0.3302)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.54 2.54)
+					(radius 0.3302)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.54 7.62)
+					(radius 0.3302)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
 					)
 				)
 				(pin passive line
-					(at -5.08 2.54 0)
+					(at 7.62 7.62 180)
 					(length 2.54)
 					(name "~"
 						(effects
@@ -735,7 +648,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 0 0)
+					(at -7.62 5.08 0)
 					(length 2.54)
 					(name "~"
 						(effects
@@ -753,7 +666,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -2.54 0)
+					(at 7.62 2.54 180)
 					(length 2.54)
 					(name "~"
 						(effects
@@ -763,6 +676,60 @@
 						)
 					)
 					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 7.62 -2.54 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -5.08 0)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 7.62 -7.62 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "6"
 						(effects
 							(font
 								(size 1.016 1.016)
@@ -2209,6 +2176,10 @@
 		)
 	)
 	(no_connect
+		(at 172.72 38.1)
+		(uuid "0040c8f5-d200-435b-9320-c7e94111f1e6")
+	)
+	(no_connect
 		(at 104.14 68.58)
 		(uuid "02067549-e9d1-447e-abeb-9bf55fcd7945")
 	)
@@ -2221,7 +2192,7 @@
 		(uuid "12a1047e-5fbd-43c3-91d3-5f451ce9d66f")
 	)
 	(no_connect
-		(at 143.51 30.48)
+		(at 157.48 25.4)
 		(uuid "1f0f33a8-3fd3-462a-b4a3-9d7f7e542aa1")
 	)
 	(no_connect
@@ -2293,8 +2264,16 @@
 		(uuid "c188f9f5-cd3c-45ff-bab1-21d668356341")
 	)
 	(no_connect
+		(at 172.72 22.86)
+		(uuid "c6443fc2-c359-4c5b-8e23-3b3d7ec787a3")
+	)
+	(no_connect
 		(at 134.62 83.82)
 		(uuid "c813a5b4-ecd3-4da8-8c73-5406830c1a6b")
+	)
+	(no_connect
+		(at 172.72 27.94)
+		(uuid "c8c4c99c-904a-4ee0-9335-f666b116a4c4")
 	)
 	(no_connect
 		(at 104.14 101.6)
@@ -2458,7 +2437,7 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 44.45) (xy 111.76 44.45)
+			(xy 111.76 44.45) (xy 137.16 44.45)
 		)
 		(stroke
 			(width 0)
@@ -2495,6 +2474,16 @@
 			(type default)
 		)
 		(uuid "3fee4555-a0df-4955-be51-89f5b74fffe1")
+	)
+	(wire
+		(pts
+			(xy 148.59 43.18) (xy 148.59 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "416a308d-c595-4a48-807a-61a2ce29895f")
 	)
 	(wire
 		(pts
@@ -2548,7 +2537,7 @@
 	)
 	(wire
 		(pts
-			(xy 137.16 27.94) (xy 143.51 27.94)
+			(xy 137.16 27.94) (xy 148.59 27.94)
 		)
 		(stroke
 			(width 0)
@@ -2698,6 +2687,16 @@
 	)
 	(wire
 		(pts
+			(xy 172.72 33.02) (xy 176.53 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "acb6eef9-dcb4-4113-b5d5-12b6388f3934")
+	)
+	(wire
+		(pts
 			(xy 90.17 76.2) (xy 90.17 68.58)
 		)
 		(stroke
@@ -2705,6 +2704,16 @@
 			(type default)
 		)
 		(uuid "b1dc060c-25ea-4740-bce0-3d4f0433e9f4")
+	)
+	(wire
+		(pts
+			(xy 153.67 35.56) (xy 157.48 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b373508b-beef-45b1-83a3-ade6b14e39ff")
 	)
 	(wire
 		(pts
@@ -2738,6 +2747,16 @@
 	)
 	(wire
 		(pts
+			(xy 176.53 43.18) (xy 148.59 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "be7c1e8c-fe4e-46bb-9970-ee30ba282ef1")
+	)
+	(wire
+		(pts
 			(xy 160.02 95.25) (xy 160.02 92.71)
 		)
 		(stroke
@@ -2745,16 +2764,6 @@
 			(type default)
 		)
 		(uuid "c068fc7f-25e1-4da1-be73-60e5add1521b")
-	)
-	(wire
-		(pts
-			(xy 137.16 44.45) (xy 132.08 44.45)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c871c041-8849-4799-9be0-d19bef01d345")
 	)
 	(wire
 		(pts
@@ -2768,7 +2777,7 @@
 	)
 	(wire
 		(pts
-			(xy 143.51 25.4) (xy 110.49 25.4)
+			(xy 110.49 25.4) (xy 153.67 25.4)
 		)
 		(stroke
 			(width 0)
@@ -2785,6 +2794,16 @@
 			(type default)
 		)
 		(uuid "ce156f04-9970-4a32-8c69-ce6d0cd4f11b")
+	)
+	(wire
+		(pts
+			(xy 153.67 25.4) (xy 153.67 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d14f3939-e3a3-4d60-a02a-3d64e19404e8")
 	)
 	(wire
 		(pts
@@ -2805,6 +2824,16 @@
 			(type default)
 		)
 		(uuid "e47a0d91-d0d1-4b6b-bea7-df8cb4a53a92")
+	)
+	(wire
+		(pts
+			(xy 176.53 33.02) (xy 176.53 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f10cd4a4-7933-4013-b1b9-ec83ee0f9567")
 	)
 	(wire
 		(pts
@@ -2887,6 +2916,195 @@
 			(project "qms_wearables"
 				(path "/81221e85-c470-4436-ab82-7fff3486476b"
 					(reference "#PWR04")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "BATTERY-2CELLS-2WIRES:BA2AAW")
+		(at 124.46 36.83 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "055900c0-16ad-4a65-8f15-f535501ea1a1")
+		(property "Reference" "BT1"
+			(at 124.46 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "BA2AAW"
+			(at 124.46 31.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "BATTERY-2CELLS-2WIRES:BAT_BA2AAW"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MF" "MPD (Memory"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MAXIMUM_PACKAGE_HEIGHT" "15.88 mm"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Package" "None"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Price" "None"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Check_prices" "https://www.snapeda.com/parts/BA2AAW/MPD/view-part/?ref=eda"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "STANDARD" "Manufacturer Recommendations"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "PARTREV" "E"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "SnapEDA_Link" "https://www.snapeda.com/parts/BA2AAW/MPD/view-part/?ref=snap"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MP" "BA2AAW"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Description_1" "\n                        \n                            Battery Holder (Open) AA 2 Cell Wire Leads - 6 (152.4mm)\n                        \n"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Availability" "In Stock"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MANUFACTURER" "MPD"
+			(at 124.46 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(pin "+"
+			(uuid "22427499-dc26-4d61-b862-9dbdc9c99398")
+		)
+		(pin "-"
+			(uuid "25eb0b54-e507-42ee-8bee-c862ef07a505")
+		)
+		(instances
+			(project ""
+				(path "/81221e85-c470-4436-ab82-7fff3486476b"
+					(reference "BT1")
 					(unit 1)
 				)
 			)
@@ -3496,6 +3714,196 @@
 		)
 	)
 	(symbol
+		(lib_id "DPDT-SLIDESWITCH-6PINS:EPS4PC3")
+		(at 165.1 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5f4923f7-1891-412c-9299-d0790c85af68")
+		(property "Reference" "J1"
+			(at 165.1 17.78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "EPS4PC3"
+			(at 165.1 20.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "DPDT-SLIDESWITCH-6PINS:SWITCHCRAFT_EPS4PC3"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Datasheet" ""
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MF" "Switchcraft"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MAXIMUM_PACKAGE_HEIGHT" "16.51 mm"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Package" "None"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Price" "None"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Check_prices" "https://www.snapeda.com/parts/EPS4PC3/SWITCHCRAFT/view-part/?ref=eda"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "STANDARD" "Manufacturer Recommendations"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "SnapEDA_Link" "https://www.snapeda.com/parts/EPS4PC3/SWITCHCRAFT/view-part/?ref=snap"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MP" "EPS4PC3"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Description_1" "\n                        \n                            Switch Slide DPDT Recessed Slide 10.1A 250VAC 250VDC PC Pins Panel Mount/Through Hole\n                        \n"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Availability" "In Stock"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MANUFACTURER" "Switchcraft"
+			(at 165.1 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "3e6cc97a-59f0-4278-80ab-a04b83d27a4e")
+		)
+		(pin "5"
+			(uuid "54c7172e-f0e7-49fd-8966-e3e3cca55786")
+		)
+		(pin "1"
+			(uuid "a18405f2-9ef4-40e2-9b11-fb139708615f")
+		)
+		(pin "6"
+			(uuid "c788fdce-90eb-4ed3-8c7d-e15a7c1a6051")
+		)
+		(pin "3"
+			(uuid "5b4410d4-8684-452a-9535-f19726ed7128")
+		)
+		(pin "2"
+			(uuid "e50a4486-5c19-4c70-b3ed-3efb4228202a")
+		)
+		(instances
+			(project ""
+				(path "/81221e85-c470-4436-ab82-7fff3486476b"
+					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "MPU6050_MODULE:module_mpu6050")
 		(at 163.83 113.03 0)
 		(unit 1)
@@ -3584,201 +3992,6 @@
 		)
 	)
 	(symbol
-		(lib_id "BK-18650-PC4:BK-18650-PC4")
-		(at 124.46 39.37 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "70aa4d65-12c6-4231-ab50-31662fbd32be")
-		(property "Reference" "BT1"
-			(at 123.825 29.21 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "BK-18650-PC4"
-			(at 123.825 31.75 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "BK-18650-PC4:BAT_BK-18650-PC4"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MF" "MPD"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "MAXIMUM_PACKAGE_HEIGHT" "21.54 mm"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Package" "None"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Price" "None"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Check_prices" "https://www.snapeda.com/parts/BK-18650-PC4/MPD/view-part/?ref=eda"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "STANDARD" "Manufacturer Recommendations"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "PARTREV" "K"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "SnapEDA_Link" "https://www.snapeda.com/parts/BK-18650-PC4/MPD/view-part/?ref=snap"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "MP" "BK-18650-PC4"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Description_1" "\n                        \n                            Battery Holder (Open) 18650 2 Cell PC Pin\n                        \n"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Availability" "In Stock"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "MANUFACTURER" "MPD"
-			(at 124.46 39.37 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(pin "2+"
-			(uuid "c143daa3-1ee9-41d6-b8ae-ca33944bf68d")
-		)
-		(pin "1+"
-			(uuid "6f4ac125-1110-4938-82fd-0880ef492873")
-		)
-		(pin "2-"
-			(uuid "c1d0b293-3852-4925-b05f-e1e734b5acd2")
-		)
-		(pin "1-"
-			(uuid "eadde111-8bae-44d5-b829-a78e9da980e4")
-		)
-		(instances
-			(project ""
-				(path "/81221e85-c470-4436-ab82-7fff3486476b"
-					(reference "BT1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Vibration_Motor_Module:Vibration_Motor_Module")
 		(at 72.39 101.6 180)
 		(unit 1)
@@ -3855,210 +4068,6 @@
 			(project ""
 				(path "/81221e85-c470-4436-ab82-7fff3486476b"
 					(reference "P2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "DPST_slide_switch:EG1218")
-		(at 148.59 27.94 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "93e7d46a-2947-45be-b7ae-9d41718ac28a")
-		(property "Reference" "S1"
-			(at 152.4 26.6699 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "EG1218"
-			(at 152.4 29.2099 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "DPST_slide_switch:SW_EG1218"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MF" "E-Switch"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "DESCRIPTION" "Slide Switch SPDT Through Hole"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "PACKAGE" "None"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "PRICE" "None"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Package" "None"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Check_prices" "https://www.snapeda.com/parts/EG1218/E-Switch/view-part/?ref=eda"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Price" "None"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "SnapEDA_Link" "https://www.snapeda.com/parts/EG1218/E-Switch/view-part/?ref=snap"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "MP" "EG1218"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Description_1" "\n                        \n                            Slide Switch, EG Series, SPDT, Non-Shorting, ON-ON, 200mA DC, 30VDC, PC Pin | E-Switch EG1218\n                        \n"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "Availability" "In Stock"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "AVAILABILITY" "In Stock"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(property "PURCHASE-URL" "https://pricing.snapeda.com/search/part/EG1218/?ref=eda"
-			(at 148.59 27.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "3757d025-9bd9-49b0-9086-f640287d24b3")
-		)
-		(pin "1"
-			(uuid "6c38fe5b-7eab-429c-aeaf-84f125562f8d")
-		)
-		(pin "2"
-			(uuid "d4a39542-226d-4ffd-aefe-f749eef315c1")
-		)
-		(instances
-			(project ""
-				(path "/81221e85-c470-4436-ab82-7fff3486476b"
-					(reference "S1")
 					(unit 1)
 				)
 			)
