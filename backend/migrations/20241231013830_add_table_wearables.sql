@@ -1,0 +1,7 @@
+CREATE TABLE wearables (
+	device_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	device_name VARCHAR NOT NULL UNIQUE,
+	uuid VARCHAR NOT NULL UNIQUE
+);
+
+CREATE UNIQUE INDEX idx_device_id ON appointments(uuid);

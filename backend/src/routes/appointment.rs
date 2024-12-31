@@ -3,7 +3,7 @@ use axum::{
     Router,
 };
 
-use crate::{handlers::appointments::*, SharedAppState};
+use crate::{handlers::appointments::*, states::SharedAppState};
 
 fn route() -> Router<SharedAppState> {
     Router::new()

@@ -4,7 +4,7 @@ use axum::{
 };
 use sqlx::query_as;
 
-use crate::{error::AppError, models::appointments::*, SharedAppState};
+use crate::{error::AppError, models::appointments::*, states::SharedAppState};
 
 pub async fn list_appointments(
     State(state): State<SharedAppState>,

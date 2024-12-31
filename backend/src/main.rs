@@ -1,23 +1,14 @@
-use std::{
-    collections::HashMap,
-    str::FromStr,
-    sync::{atomic::AtomicUsize, Arc, RwLock},
-    time::Duration,
-};
+use std::{str::FromStr, sync::Arc, time::Duration};
 
 use axum::{
     extract::{MatchedPath, Request},
     http::Method,
     Router,
 };
-use priority_queue::PriorityQueue;
-use queue::QueuePriority;
 use routes::make_routes;
-use rumqttc::v5::{
-    mqttbytes::{v5::Packet::Publish, QoS},
-    AsyncClient, Event, EventLoop, MqttOptions,
-};
+use rumqttc::{mqttbytes::QoS, AsyncClient, Event, EventLoop, MqttOptions};
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
+use states::*;
 use tokio::{net::TcpListener, sync::broadcast, task};
 use tower_http::{
     cors::{Any, CorsLayer},
@@ -30,45 +21,7 @@ mod handlers;
 mod models;
 mod queue;
 mod routes;
-
-struct AppState {
-    db: SharedDb,
-    queue: QueueState,
-}
-
-type SharedDb = sqlx::Pool<sqlx::Sqlite>;
-type SharedAppState = Arc<AppState>;
-type SharedQueue = Arc<RwLock<PriorityQueue<String, QueuePriority>>>;
-type SharedVerifier = Arc<RwLock<HashMap<uuid::Uuid, broadcast::Sender<String>>>>;
-
-// TODO: determine the type of broadcast sender
-#[derive(Debug)]
-struct QueueState {
-    next_queue_no: AtomicUsize,
-    verifier: SharedVerifier,
-    queue: SharedQueue,
-    status: broadcast::Sender<String>,
-}
-
-impl AppState {
-    fn new(db: SharedDb, tx: broadcast::Sender<String>) -> AppState {
-        AppState {
-            db,
-            queue: QueueState::new(tx),
-        }
-    }
-}
-
-impl QueueState {
-    fn new(tx: broadcast::Sender<String>) -> QueueState {
-        QueueState {
-            next_queue_no: AtomicUsize::new(1),
-            verifier: Arc::new(RwLock::new(HashMap::new())),
-            queue: SharedQueue::new(RwLock::new(PriorityQueue::default())),
-            status: tx,
-        }
-    }
-}
+mod states;
 
 async fn init_db(db_uri: &str) -> Result<SqlitePool, sqlx::Error> {
     let opts = SqliteConnectOptions::from_str(db_uri)?.create_if_missing(true);
@@ -77,13 +30,12 @@ async fn init_db(db_uri: &str) -> Result<SqlitePool, sqlx::Error> {
     Ok(pool)
 }
 
-async fn init_mqtt_client() -> Result<(AsyncClient, EventLoop), rumqttc::v5::ClientError> {
-    let mut mqtt_opts = MqttOptions::new("ble32", "192.168.0.7", 1883);
+async fn init_mqtt_client() -> Result<(AsyncClient, EventLoop), rumqttc::ClientError> {
+    let mut mqtt_opts = MqttOptions::new("ble32", "0.0.0.0", 6969);
     mqtt_opts.set_keep_alive(Duration::from_secs(5));
     let (cl, event_loop) = AsyncClient::new(mqtt_opts, 10);
     cl.subscribe("heartRate/BPM", QoS::AtMostOnce).await?;
-    cl.subscribe("accelerometer/accMag", QoS::AtMostOnce)
-        .await?;
+    cl.subscribe("accelerometer/fall", QoS::AtMostOnce).await?;
 
     Ok((cl, event_loop))
 }
@@ -96,8 +48,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let pool = init_db("sqlite://qms.db").await?;
 
+    // TODO: add tx to app state
     let (tx, mut rx) = broadcast::channel(100);
-    let state = Arc::new(AppState::new(pool, tx));
+    let (tx_subs, _) = broadcast::channel::<MqttPayload>(100);
+    let iot = IotState {
+        tx_subscribe: tx_subs.clone(),
+    };
+    let state = Arc::new(AppState::new(pool, tx, iot));
 
     // mqtt client
     let (cl, mut event_loop) = init_mqtt_client().await?;
@@ -113,9 +70,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Ok(notif) = notif {
                 match notif {
                     Event::Incoming(packet) => {
-                        if let Publish(publish) = packet {
-                            // TODO: process the payload
-                            println!("[{:?}] {:?}", publish.topic, publish.payload);
+                        /*
+                        # payload structure #
+                        {
+                            "uuid": "<generated-uuid>", // uuid of the wearables
+                            "topic": "<topic of the publisher>",
+                            "data": {
+                                // any data published
+                                "bpm": 123,
+                                "fell_down": true,
+                                "location": "<location-uuid>",
+                            },
+                        }
+                        */
+                        // if let Publish { dup: publish, qos, retain, topic, pkid, payload } = packet {
+                        //     if let Some(payload) = std::str::from_utf8(&publish.payload).ok() {
+                        //         tx_subs.send(payload.into()).unwrap();
+                        //     }
+                        // }
+
+                        if let rumqttc::Packet::Publish(publish) = packet {
+                            if let Some(payload) = std::str::from_utf8(&publish.payload).ok() {
+                                let mut res: MqttPayload = serde_json::from_str(payload).unwrap();
+                                res.topic = publish.topic;
+                                let _ = tx_subs.send(res);
+                            }
                         }
                     }
                     _ => {}
@@ -147,7 +126,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .layer(cors);
 
-    let listener = TcpListener::bind("0.0.0.0:3000").await?;
+    let listener = TcpListener::bind("0.0.0.0:8000").await?;
     tracing::debug!("listening on {}", listener.local_addr()?);
     let server = task::spawn(async { axum::serve(listener, app).await });
 

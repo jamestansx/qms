@@ -3,7 +3,7 @@ use axum::{
     Router,
 };
 
-use crate::{handlers::queues::*, SharedAppState};
+use crate::{handlers::queues::*, states::SharedAppState};
 
 fn route() -> Router<SharedAppState> {
     Router::new()

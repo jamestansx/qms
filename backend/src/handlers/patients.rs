@@ -4,7 +4,7 @@ use axum::{
 };
 use sqlx::query_as;
 
-use crate::{error::AppError, models::patients::*, SharedAppState};
+use crate::{error::AppError, models::patients::*, states::SharedAppState};
 
 pub async fn register_patient(
     State(state): State<SharedAppState>,

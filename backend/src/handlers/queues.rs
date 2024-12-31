@@ -20,7 +20,7 @@ use crate::{
     error::AppError,
     models::{patients::PatientModel, queues::RegQueueParams},
     queue::QueuePriority,
-    SharedAppState, SharedQueue, SharedVerifier,
+    states::{SharedAppState, SharedQueue, SharedVerifier},
 };
 
 pub async fn queue_status(
