@@ -6,6 +6,8 @@ sealed class WearableEvent {
 
 final class WearablesFetched extends WearableEvent {}
 
+final class MonitorDashboard extends WearableEvent {}
+
 final class SelectWearable extends WearableEvent {
   final Wearable wearable;
 

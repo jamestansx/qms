@@ -1,12 +1,25 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:fetch_client/fetch_client.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:qms_staff/core/dio_client.dart';
+import 'package:qms_staff/dashboard/model/stream_data.dart';
 import 'package:qms_staff/dashboard/model/wearable.dart';
 
 class WearablesRepo extends DioClient {
-  Future<FetchResponse> monitor() async {
+  final _controller = StreamController<StreamData>();
+
+  Stream<StreamData> get stream async* {
+    yield* _controller.stream;
+  }
+
+  void dispose() {
+    _controller.close();
+  }
+
+  Stream<StreamData> monitor() async* {
     final FetchClient cl = FetchClient(mode: RequestMode.cors);
     final res = await cl.send(
       http.Request(
@@ -15,7 +28,14 @@ class WearablesRepo extends DioClient {
       ),
     );
 
-    return res;
+    final stream = res.stream
+        .toStringStream()
+        .asBroadcastStream()
+        .map((event) => StreamData.fromJson(event));
+
+    _controller.addStream(stream, cancelOnError: true);
+
+    yield* stream;
   }
 
   Future<List<Wearable>> fetchList() async {

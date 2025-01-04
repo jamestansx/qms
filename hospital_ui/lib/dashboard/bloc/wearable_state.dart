@@ -8,31 +8,37 @@ final class WearableState extends Equatable {
     this.wearables = const <Wearable>[],
     this.selectedItem,
     this.isLoading,
-    this.response,
+    this.streamData,
   });
 
   final WearableStatus status;
   final List<Wearable> wearables;
   final Wearable? selectedItem;
-  final FetchResponse? response;
+  final StreamData? streamData;
   final bool? isLoading;
 
   WearableState copyWith({
     WearableStatus? status,
     List<Wearable>? wearables,
     Wearable? Function()? selectedItem,
-    FetchResponse? response,
+    StreamData? streamData,
     bool? isLoading,
   }) {
     return WearableState(
       status: status ?? this.status,
       wearables: wearables ?? this.wearables,
       selectedItem: selectedItem != null ? selectedItem() : this.selectedItem,
-      response: response ?? this.response,
+      streamData: streamData ?? this.streamData,
       isLoading: isLoading ?? this.isLoading,
     );
   }
 
   @override
-  List<Object?> get props => [status, wearables];
+  List<Object?> get props => [
+        status,
+        wearables,
+        streamData,
+        selectedItem,
+        isLoading,
+      ];
 }

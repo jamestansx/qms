@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fetch_client/fetch_client.dart';
+import 'package:qms_staff/dashboard/model/stream_data.dart';
 import 'package:qms_staff/dashboard/model/wearable.dart';
 import 'package:qms_staff/dashboard/services/wearables_repo.dart';
 
-part "wearable_state.dart";
 part "wearable_event.dart";
+part "wearable_state.dart";
 
 class WearableBloc extends Bloc<WearableEvent, WearableState> {
   WearableBloc({
@@ -14,9 +14,22 @@ class WearableBloc extends Bloc<WearableEvent, WearableState> {
         super(const WearableState()) {
     on<WearablesFetched>(_onFetch);
     on<SelectWearable>(_onSelectWearable);
+    on<MonitorDashboard>(_onMonitorStarted);
   }
 
   final WearablesRepo _wearableRepo;
+
+  Future<void> _onMonitorStarted(
+    MonitorDashboard event,
+    Emitter<WearableState> emit,
+  ) async {
+    return emit.onEach(
+      _wearableRepo.monitor(),
+      onData: (status) async {
+        return emit(state.copyWith(streamData: status));
+      },
+    );
+  }
 
   Future<void> _onFetch(
     WearablesFetched event,
@@ -43,15 +56,15 @@ class WearableBloc extends Bloc<WearableEvent, WearableState> {
     Emitter<WearableState> emit,
   ) async {
     try {
-      if (state.response != null) {
-        state.response!.cancel();
-      }
+      // if (state.streamData != null) {
+      //   state.streamData!.cancel();
+      // }
 
-      final response = await _wearableRepo.monitor();
+      // final response = await _wearableRepo.monitor();
 
       emit(state.copyWith(
         selectedItem: () => event.wearable,
-        response: response,
+        // streamData: response,
       ));
     } catch (_) {
       emit(state.copyWith(

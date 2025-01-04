@@ -2,12 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qms_staff/dashboard/bloc/wearable_bloc.dart';
 
-class WearablesList extends StatelessWidget {
+class WearablesList extends StatefulWidget {
   const WearablesList({super.key});
 
   @override
+  State<WearablesList> createState() => _WearablesListState();
+}
+
+class _WearablesListState extends State<WearablesList> {
+  List<String> alertDevice = [];
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WearableBloc, WearableState>(
+    return BlocConsumer<WearableBloc, WearableState>(
+      listener: (context, state) {
+        if (state.streamData != null &&
+            state.streamData!.topic == "accelerometer/fall") {
+          if (state.streamData!.deviceName == state.selectedItem?.deviceName) {
+            alertDevice.add(state.streamData!.deviceName);
+          }
+        }
+      },
       builder: (context, state) {
         switch (state.status) {
           case WearableStatus.initial:
@@ -22,10 +37,14 @@ class WearablesList extends StatelessWidget {
 
                 return Material(
                   child: ListTile(
+                    leading: alertDevice.contains(item.deviceName)
+                        ? const Icon(Icons.play_circle_fill)
+                        : null,
                     title: Text(item.deviceName),
                     dense: true,
                     subtitle: Text(item.uuid),
                     onTap: () {
+                      alertDevice.remove(item.deviceName);
                       context.read<WearableBloc>().add(
                             SelectWearable(wearable: item),
                           );

@@ -46,6 +46,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final PageController pageController = PageController();
   final SideMenuController sideMenu = SideMenuController();
+  late final WearablesRepo _wearablesRepo;
 
   SideMenuDisplayMode displayMode = SideMenuDisplayMode.open;
   int rotate = 90;
@@ -56,6 +57,14 @@ class _HomePageState extends State<HomePage> {
     sideMenu.addListener((idx) {
       pageController.jumpToPage(idx);
     });
+
+    _wearablesRepo = WearablesRepo();
+  }
+
+  @override
+  void dispose() {
+    _wearablesRepo.dispose();
+    super.dispose();
   }
 
   @override
@@ -87,15 +96,18 @@ class _HomePageState extends State<HomePage> {
           child: PageView(
             controller: pageController,
             children: [
-              BlocProvider(
-                create: (_) => WearableBloc(
-                  wearableRepo: WearablesRepo(),
-                ),
-                child: const Row(
-                  children: [
-                    WearablesList(),
-                    DashboardPage(),
-                  ],
+              RepositoryProvider.value(
+                value: _wearablesRepo,
+                child: BlocProvider(
+                  create: (_) => WearableBloc(
+                    wearableRepo: _wearablesRepo,
+                  )..add(MonitorDashboard()),
+                  child: const Row(
+                    children: [
+                      WearablesList(),
+                      DashboardPage(),
+                    ],
+                  ),
                 ),
               ),
               const QueueStatusPage(),
