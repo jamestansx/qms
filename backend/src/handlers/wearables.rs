@@ -33,6 +33,7 @@ pub async fn monitor_status(
                         yield Event::default().data(serde_json::to_string(&WearableStatRes {
                             uuid: recv.uuid,
                             device_name: device_name.unwrap().device_name,
+                            topic: recv.topic,
                             data: recv.data.get("bpm").unwrap_or(&"-1".to_string()).to_string(),
                         }).unwrap());
                     },
@@ -48,6 +49,7 @@ pub async fn monitor_status(
                             yield Event::default().data(serde_json::to_string(&WearableStatRes {
                                 uuid: recv.uuid,
                                 device_name: device_name.unwrap().device_name,
+                                topic: recv.topic,
                                 data: location_name.unwrap().location_name,
                             }).unwrap());
                         }

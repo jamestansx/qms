@@ -16,5 +16,6 @@ pub struct RegWearableParams {
 pub struct WearableStatRes {
     pub uuid: uuid::Uuid,
     pub device_name: String,
+    pub topic: String,
     pub data: String,
 }
