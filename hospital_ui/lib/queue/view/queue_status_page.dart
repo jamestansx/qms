@@ -103,11 +103,15 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
                                 children: [
                                   Expanded(
                                       child: ElevatedButton(
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            await QueueRepo().alertQueue();
+                                          },
                                           child: const Icon(Icons.add_alert))),
                                   Expanded(
                                       child: ElevatedButton(
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            await QueueRepo().nextQueue();
+                                          },
                                           child:
                                               const Icon(Icons.navigate_next))),
                                 ],

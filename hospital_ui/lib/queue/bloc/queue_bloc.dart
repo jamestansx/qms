@@ -10,33 +10,15 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
     required QueueRepo queueRepo,
   })  : _queueRepo = queueRepo,
         super(const QueueState()) {
-    on<AddQueue>(_onAddQueue);
-    on<Dequeue>(_onDequeue);
+    on<NextQueue>(_onNextQueue);
   }
 
   final QueueRepo _queueRepo;
 
-  void _onDequeue(
-    Dequeue event,
+  void _onNextQueue(
+    NextQueue event,
     Emitter<QueueState> emit,
   ) {
-    emit(
-      state.copyWith(
-        status: QueueStatus.unqueued,
-        queueNo: null,
-      ),
-    );
-  }
-
-  void _onAddQueue(
-    AddQueue event,
-    Emitter<QueueState> emit,
-  ) {
-    emit(
-      state.copyWith(
-        status: QueueStatus.queued,
-        queueNo: event.queueNo,
-      ),
-    );
+    _queueRepo.nextQueue();
   }
 }

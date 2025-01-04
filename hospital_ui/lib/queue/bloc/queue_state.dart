@@ -9,12 +9,10 @@ enum QueueStatus {
 final class QueueState extends Equatable {
   const QueueState({
     this.status = QueueStatus.unqueued,
-    this.queueNo,
     this.isLoading,
   });
 
   final QueueStatus status;
-  final int? queueNo;
   final bool? isLoading;
 
   QueueState copyWith({
@@ -24,11 +22,10 @@ final class QueueState extends Equatable {
   }) {
     return QueueState(
       status: status ?? this.status,
-      queueNo: queueNo ?? this.queueNo,
       isLoading: isLoading ?? this.isLoading,
     );
   }
 
   @override
-  List<Object?> get props => [status, queueNo, isLoading];
+  List<Object?> get props => [status, isLoading];
 }
