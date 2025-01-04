@@ -10,6 +10,7 @@ fn route() -> Router<SharedAppState> {
         .route("/", get(queue_status))
         .route("/verify", post(verify_queue))
         .route("/register", post(register_queue))
+        .route("/alert", get(alert_queue))
         .route("/next", get(next_queue))
 }
 

@@ -169,10 +169,18 @@ pub async fn next_queue(State(state): State<SharedAppState>) {
             .send(format!("{}", q.1.queue_no))
             .unwrap();
     } else {
+        state.queue.status.send("".into()).unwrap();
+    }
+}
+
+pub async fn alert_queue(State(state): State<SharedAppState>) {
+    let priority_queue = state.queue.queue.read().unwrap();
+    let q = priority_queue.peek();
+    if let Some(q) = q {
         state
             .queue
             .status
-            .send("".into())
+            .send(format!("{}", q.1.queue_no))
             .unwrap();
     }
 }
