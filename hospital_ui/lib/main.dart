@@ -69,52 +69,54 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SideMenu(
-          style: SideMenuStyle(
-            displayMode: displayMode,
-          ),
-          controller: sideMenu,
-          items: [
-            SideMenuItem(
-              title: "Dashboard",
-              onTap: (index, _) {
-                sideMenu.changePage(index);
-              },
+    return RepositoryProvider.value(
+      value: _wearablesRepo,
+      child: BlocProvider(
+        create: (_) => WearableBloc(
+          wearableRepo: _wearablesRepo,
+        )
+          ..add(MonitorDashboard())
+          ..add(WearablesFetched()),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SideMenu(
+              style: SideMenuStyle(
+                displayMode: displayMode,
+              ),
+              controller: sideMenu,
+              items: [
+                SideMenuItem(
+                  title: "Dashboard",
+                  onTap: (index, _) {
+                    sideMenu.changePage(index);
+                  },
+                ),
+                SideMenuItem(
+                  title: "Queue",
+                  onTap: (index, _) {
+                    sideMenu.changePage(index);
+                  },
+                ),
+              ],
             ),
-            SideMenuItem(
-              title: "Queue",
-              onTap: (index, _) {
-                sideMenu.changePage(index);
-              },
-            ),
-          ],
-        ),
-        Expanded(
-          child: PageView(
-            controller: pageController,
-            children: [
-              RepositoryProvider.value(
-                value: _wearablesRepo,
-                child: BlocProvider(
-                  create: (_) => WearableBloc(
-                    wearableRepo: _wearablesRepo,
-                  )..add(MonitorDashboard()),
-                  child: const Row(
+            Expanded(
+              child: PageView(
+                controller: pageController,
+                children: const [
+                  Row(
                     children: [
                       WearablesList(),
                       DashboardPage(),
                     ],
                   ),
-                ),
+                  QueueStatusPage(),
+                ],
               ),
-              const QueueStatusPage(),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

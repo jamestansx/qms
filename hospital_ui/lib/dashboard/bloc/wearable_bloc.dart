@@ -41,12 +41,12 @@ class WearableBloc extends Bloc<WearableEvent, WearableState> {
         state.copyWith(
           status: WearableStatus.success,
           wearables: wearables,
+          selectedIdx: 0,
         ),
       );
     } catch (_) {
       emit(state.copyWith(
         status: WearableStatus.failure,
-        selectedItem: () => null,
       ));
     }
   }
@@ -55,21 +55,8 @@ class WearableBloc extends Bloc<WearableEvent, WearableState> {
     SelectWearable event,
     Emitter<WearableState> emit,
   ) async {
-    try {
-      // if (state.streamData != null) {
-      //   state.streamData!.cancel();
-      // }
-
-      // final response = await _wearableRepo.monitor();
-
-      emit(state.copyWith(
-        selectedItem: () => event.wearable,
-        // streamData: response,
-      ));
-    } catch (_) {
-      emit(state.copyWith(
-        selectedItem: () => null,
-      ));
-    }
+    emit(state.copyWith(
+      selectedIdx: event.idx,
+    ));
   }
 }

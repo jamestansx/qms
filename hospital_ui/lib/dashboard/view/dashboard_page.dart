@@ -19,7 +19,8 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, state) {
         if (state.streamData != null) {
           if (state.streamData!.topic == "accelerometer/fall" &&
-              state.streamData!.deviceName == state.selectedItem?.deviceName) {
+              state.streamData!.deviceName ==
+                  state.wearables[state.selectedIdx].deviceName) {
             setState(() {
               location = state.streamData!.data;
             });
@@ -29,18 +30,17 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Column(
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.width * 0.8,
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: MediaQuery.of(context).size.height * 0.8,
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: RealTimeGraph(
                         stream: RepositoryProvider.of<WearablesRepo>(context)
                             .stream
-                            .asBroadcastStream()
                             .where((event) => event.topic == "heartRate/BPM")
                             .where((event) =>
                                 event.deviceName ==
-                                state.selectedItem?.deviceName)
+                                state.wearables[state.selectedIdx].deviceName)
                             .map((event) => double.parse(event.data)),
                       ),
                     ),
@@ -69,7 +69,9 @@ class _DashboardPageState extends State<DashboardPage> {
           );
         }
 
-        return const Center(child: CircularProgressIndicator());
+        return const Expanded(
+          child: Center(child: CircularProgressIndicator()),
+        );
       },
     );
   }

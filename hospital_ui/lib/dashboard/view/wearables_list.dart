@@ -18,7 +18,8 @@ class _WearablesListState extends State<WearablesList> {
       listener: (context, state) {
         if (state.streamData != null &&
             state.streamData!.topic == "accelerometer/fall") {
-          if (state.streamData!.deviceName == state.selectedItem?.deviceName) {
+          if (state.streamData!.deviceName ==
+              state.wearables[state.selectedIdx].deviceName) {
             alertDevice.add(state.streamData!.deviceName);
           }
         }
@@ -26,32 +27,38 @@ class _WearablesListState extends State<WearablesList> {
       builder: (context, state) {
         switch (state.status) {
           case WearableStatus.initial:
-            return const Center(child: CircularProgressIndicator());
+            return const Expanded(
+              child: Center(child: CircularProgressIndicator()),
+            );
           case WearableStatus.failure:
             return const Center(child: Text("YOU FUCKED UP"));
           case WearableStatus.success:
-            return ListView.builder(
-              itemCount: state.wearables.length,
-              itemBuilder: (context, idx) {
-                final item = state.wearables[idx];
+            return SizedBox(
+              width: 200,
+              child: ListView.builder(
+                itemCount: state.wearables.length,
+                itemBuilder: (context, idx) {
+                  final item = state.wearables[idx];
 
-                return Material(
-                  child: ListTile(
-                    leading: alertDevice.contains(item.deviceName)
-                        ? const Icon(Icons.play_circle_fill)
-                        : null,
-                    title: Text(item.deviceName),
-                    dense: true,
-                    subtitle: Text(item.uuid),
-                    onTap: () {
-                      alertDevice.remove(item.deviceName);
-                      context.read<WearableBloc>().add(
-                            SelectWearable(wearable: item),
-                          );
-                    },
-                  ),
-                );
-              },
+                  return Material(
+                    child: ListTile(
+                      selected: state.selectedIdx == idx,
+                      leading: alertDevice.contains(item.deviceName)
+                          ? const Icon(Icons.play_circle_fill)
+                          : null,
+                      title: Text(item.deviceName),
+                      dense: true,
+                      subtitle: Text(item.uuid),
+                      onTap: () {
+                        alertDevice.remove(item.deviceName);
+                        context
+                            .read<WearableBloc>()
+                            .add(SelectWearable(idx: idx));
+                      },
+                    ),
+                  );
+                },
+              ),
             );
         }
       },

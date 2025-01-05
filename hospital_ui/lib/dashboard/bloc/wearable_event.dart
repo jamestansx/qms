@@ -9,7 +9,7 @@ final class WearablesFetched extends WearableEvent {}
 final class MonitorDashboard extends WearableEvent {}
 
 final class SelectWearable extends WearableEvent {
-  final Wearable wearable;
+  final int idx;
 
-  SelectWearable({required this.wearable});
+  SelectWearable({required this.idx});
 }
