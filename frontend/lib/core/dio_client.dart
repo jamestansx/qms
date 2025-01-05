@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
 abstract class DioClient {
-  static const baseUrl = "http://192.168.0.2:3000/api/v1";
+  static const baseUrl = "http://192.168.0.2:8000/api/v1";
   late final Dio dio;
 
   DioClient() {
