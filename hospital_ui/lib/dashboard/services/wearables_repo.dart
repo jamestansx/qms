@@ -24,7 +24,7 @@ class WearablesRepo extends DioClient {
     final res = await cl.send(
       http.Request(
         "GET",
-        Uri.http("192.168.0.2:3000", "/api/v1/wearables/monitor"),
+        Uri.http("192.168.0.2:8000", "/api/v1/wearables/monitor"),
       ),
     );
 

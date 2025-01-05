@@ -9,7 +9,7 @@ class QueueRepo extends DioClient {
     return cl.send(
       Request(
         "GET",
-        Uri.http("192.168.0.2:3000", "/api/v1/queues"),
+        Uri.http("192.168.0.2:8000", "/api/v1/queues"),
       ),
     );
   }
