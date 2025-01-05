@@ -43,6 +43,8 @@ dependencies:
   fetch_client: ^1.1.2
   http: ^1.2.2
   real_time_chart: ^0.0.1
+  graphic: ^2.5.0
+  intl: ^0.20.1
 
 dev_dependencies:
   flutter_test:

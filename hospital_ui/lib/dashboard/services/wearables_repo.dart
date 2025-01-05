@@ -12,6 +12,8 @@ import 'package:qms_staff/dashboard/model/wearable.dart';
 class WearablesRepo extends DioClient {
   final _controller = StreamController<StreamData>.broadcast();
 
+  StreamController<StreamData> get controller => _controller;
+
   Stream<StreamData> get stream async* {
     yield* _controller.stream;
   }

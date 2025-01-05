@@ -1,26 +1,44 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphic/graphic.dart';
+import 'package:intl/intl.dart';
 import 'package:qms_staff/dashboard/bloc/wearable_bloc.dart';
+import 'package:qms_staff/dashboard/model/stream_data.dart';
 import 'package:qms_staff/dashboard/services/wearables_repo.dart';
-import 'package:real_time_chart/real_time_chart.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  const DashboardPage({
+    super.key,
+    required this.controller,
+  });
+
+  final StreamController<StreamData> controller;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
+class TimeSeries {
+  final DateTime dt;
+  final int value;
+
+  TimeSeries({required this.dt, required this.value});
+}
+
 class _DashboardPageState extends State<DashboardPage> {
   String? location;
+  List<TimeSeries> data = [];
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<WearableBloc, WearableState>(
       builder: (context, state) {
         if (state.streamData != null) {
           if (state.streamData!.topic == "accelerometer/fall" &&
-              state.streamData!.deviceName ==
-                  state.wearables[state.selectedIdx].deviceName) {
+              state.wearables
+                  .any((e) => e.deviceName == state.streamData!.deviceName)) {
             setState(() {
               location = state.streamData!.data;
             });
@@ -29,21 +47,66 @@ class _DashboardPageState extends State<DashboardPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.5,
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: RealTimeGraph(
-                        stream: RepositoryProvider.of<WearablesRepo>(context)
-                            .stream
-                            .where((event) => event.topic == "heartRate/BPM")
-                            .where((event) =>
-                                event.deviceName ==
-                                state.wearables[state.selectedIdx].deviceName)
-                            .map((event) => double.parse(event.data)),
-                      ),
-                    ),
+                  const Text(
+                    "Heart Rate Monitoring",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  StreamBuilder(
+                    stream: RepositoryProvider.of<WearablesRepo>(context)
+                        .stream
+                        .where((event) => event.topic == "heartRate/BPM")
+                        .where((event) => state.wearables
+                            .any((e) => e.deviceName == event.deviceName))
+                        .map((ev) => TimeSeries(
+                            dt: DateTime.now(), value: int.parse(ev.data))),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        data.add(snapshot.data!);
+                      }
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        width: MediaQuery.of(context).size.width * 0.55,
+                        height: MediaQuery.of(context).size.height,
+                        child: Chart(
+                          data: data,
+                          variables: {
+                            "dt": Variable(
+                              accessor: (TimeSeries datum) => datum.dt,
+                              scale: TimeScale(
+                                formatter: (t) => DateFormat.Hms().format(t),
+                              ),
+                            ),
+                            "value": Variable(
+                              accessor: (TimeSeries datum) => datum.value,
+                            ),
+                          },
+                          marks: [
+                            LineMark(
+                              shape: ShapeEncode(
+                                  value: BasicLineShape(dash: [5, 2])),
+                              selected: {
+                                "touchMove": {1},
+                              },
+                            ),
+                          ],
+                          coord: RectCoord(color: const Color(0xffdddddd)),
+                          axes: [
+                            Defaults.horizontalAxis,
+                            Defaults.verticalAxis,
+                          ],
+                          selections: {
+                            "touchMove": PointSelection(
+                              on: {
+                                GestureType.scaleUpdate,
+                                GestureType.tapDown,
+                                GestureType.longPressMoveUpdate,
+                              },
+                              dim: Dim.x,
+                            ),
+                          },
+                        ),
+                      );
+                    },
                   ),
                   if (location != null)
                     Card(

@@ -103,14 +103,19 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: PageView(
                 controller: pageController,
-                children: const [
+                children: [
                   Row(
                     children: [
-                      WearablesList(),
-                      DashboardPage(),
+                      const WearablesList(),
+                      BlocBuilder<WearableBloc, WearableState>(
+                          builder: (context, state) {
+                        return DashboardPage(
+                          controller: _wearablesRepo.controller,
+                        );
+                      }),
                     ],
                   ),
-                  QueueStatusPage(),
+                  const QueueStatusPage(),
                 ],
               ),
             ),
