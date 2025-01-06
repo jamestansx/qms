@@ -27,6 +27,12 @@ pub struct LoginPatientParams {
     pub password: String,
 }
 
+#[derive(Deserialize)]
+pub struct FilterPatientQuery {
+    #[serde(default)]
+    pub name: String,
+}
+
 impl PatientModel {
     pub fn age(self: &Self) -> usize {
         let today = Utc::now();

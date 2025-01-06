@@ -1,6 +1,7 @@
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qms_staff/appointment/view/add_appointment.dart';
 import 'package:qms_staff/dashboard/bloc/wearable_bloc.dart';
 import 'package:qms_staff/dashboard/services/wearables_repo.dart';
 import 'package:qms_staff/dashboard/view/dashboard_page.dart';
@@ -8,7 +9,7 @@ import 'package:qms_staff/dashboard/view/wearables_list.dart';
 import 'package:qms_staff/queue/view/queue_status_page.dart';
 
 void main() {
-  runApp(const QmsStaffApp());
+  runApp(const MaterialApp(home: QmsStaffApp()));
 }
 
 class QmsStaffApp extends StatelessWidget {
@@ -31,6 +32,13 @@ class QmsStaffApp extends StatelessWidget {
           title: const Text("QMS Dashboard"),
         ),
         body: const HomePage(),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () async => showDialog(
+            context: context,
+            builder: (context) => const AddAppointmentPage(),
+          ),
+        ),
       ),
     );
   }

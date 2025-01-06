@@ -1,8 +1,8 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
-use sqlx::query_as;
+use sqlx::{query_as, QueryBuilder};
 
 use crate::{error::AppError, models::patients::*, states::SharedAppState};
 
@@ -55,6 +55,30 @@ pub async fn get_patient_by_id(
     .bind(id)
     .fetch_one(&state.db)
     .await?;
+
+    Ok(Json(res))
+}
+
+pub async fn get_patient_list(
+    State(state): State<SharedAppState>,
+    Query(query): Query<FilterPatientQuery>,
+) -> Result<Json<Vec<PatientModel>>, AppError> {
+    let mut builder: QueryBuilder<sqlx::Sqlite> = QueryBuilder::new("SELECT * FROM patients ");
+
+    if !query.name.is_empty() {
+        builder.push("WHERE ");
+        builder.push("first_name LIKE ");
+        builder.push_bind(format!("{}%", query.name));
+        builder.push("OR ");
+        builder.push("last_name LIKE ");
+        builder.push_bind(format!("{}%", query.name));
+    }
+
+    let res: Vec<PatientModel> = query_as(builder.sql().into())
+        .bind(format!("{}%", query.name))
+        .bind(format!("{}%", query.name))
+        .fetch_all(&state.db)
+        .await?;
 
     Ok(Json(res))
 }

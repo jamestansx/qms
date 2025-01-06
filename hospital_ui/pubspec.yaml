@@ -45,6 +45,7 @@ dependencies:
   real_time_chart: ^0.0.1
   graphic: ^2.5.0
   intl: ^0.20.1
+  dropdown_search: ^6.0.1
 
 dev_dependencies:
   flutter_test:

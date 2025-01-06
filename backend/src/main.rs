@@ -124,7 +124,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 })
                 .on_failure(()),
         )
-        .layer(cors);
+        .layer(cors)
+        .layer(CorsLayer::permissive());
 
     let listener = TcpListener::bind("0.0.0.0:8000").await?;
     tracing::debug!("listening on {}", listener.local_addr()?);
