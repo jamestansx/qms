@@ -209,8 +209,13 @@ void heartrate() {
       lastBeatTime = millis(); // Update the last beat time
       Serial.print(" | Heart Rate: ");
       Serial.println(myBPM);
-      char payload_heart[50];
-      snprintf(payload_heart, 50, "{\"BPM\": %d}", myBPM); // Format data as JSON
+      String payload_heart = String("{\"uuid\": \"");
+      payload_heart.concat(DEVICE_UUID);
+      payload_heart.concat("\", \"data\": { \"BPM\": ");
+      payload_heart.concat(String(myBPM));
+      payload_heart.concat("}}");
+      Serial.print("Publish data: ");
+      Serial.println(payload_heart);
       mqttClient.publish(mqtt_topic_heart, payload_heart);
     }
   }
