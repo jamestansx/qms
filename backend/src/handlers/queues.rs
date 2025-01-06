@@ -66,14 +66,14 @@ fn update_queue(
     age: usize,
     scheduled_at_utc: NaiveDateTime,
     status: &Sender<String>,
-) {
+) -> Option<usize> {
     let tx = verifier.read().unwrap();
     let tx = tx.get(&uuid);
 
     if let Some(tx) = tx {
         let mut priority_queue = queue.write().unwrap();
         if priority_queue.get(&uuid.to_string()).is_some() {
-            return;
+            return None;
         }
         let queue_no = next_queue_no.load(Ordering::Relaxed);
         priority_queue.push(
@@ -89,16 +89,19 @@ fn update_queue(
                 status.send(format!("{}", queue_no)).unwrap();
             }
             next_queue_no.fetch_add(1, Ordering::Relaxed);
+            return Some(queue_no);
         } else {
             error!("Unable to send queue number");
         }
     }
+
+    return None;
 }
 
 pub async fn verify_queue(
     State(state): State<SharedAppState>,
     Json(params): Json<RegQueueParams>,
-) -> Result<(), AppError> {
+) -> Result<String, AppError> {
     let res = query!(
         "SELECT appointment_id, patient_id, scheduled_at_utc, uuid as 'uuid: uuid::Uuid'
         FROM appointments
@@ -116,7 +119,7 @@ pub async fn verify_queue(
     .fetch_one(&state.db)
     .await?;
 
-    update_queue(
+    let queue_no = update_queue(
         state.queue.verifier.clone(),
         params.uuid,
         &state.queue.next_queue_no,
@@ -133,7 +136,11 @@ pub async fn verify_queue(
     .execute(&state.db)
     .await?;
 
-    Ok(())
+    Ok(format!(
+        "Welcome {}! Queue no.: {}",
+        patient.username,
+        queue_no.unwrap()
+    ))
 }
 
 pub async fn register_queue(
