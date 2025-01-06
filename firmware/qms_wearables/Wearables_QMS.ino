@@ -55,7 +55,7 @@ struct BleBeacon {
   BLEUUID uuid;
   int rssi;
 };
-BleBeacon bleBeacons[SIZEOF(known_beacons)] = {0};
+BleBeacon bleBeacons[SIZEOF(known_beacons)] = {};
 
 //Variables: heartrate
 const int PulseWire =34;       // PulseSensor PURPLE WIRE connected to GPIO36 (ADC1_CH0).
@@ -112,18 +112,18 @@ void connectToMQTT() {
 }
 
 String printAndSendRSSI() {
-  String uuid = NULL;
+  String uuid = "";
   int rssi = 0;
   for (int i = 0; i < SIZEOF(bleBeacons); i++) {
-    if (uuid == null) {
+    if (uuid.isEmpty()) {
       rssi = bleBeacons[i].rssi;
-      uuid = bleBeacons[i].uuid;
+      uuid = bleBeacons[i].uuid.toString();
       continue;
     }
 
     if (bleBeacons[i].rssi > rssi) {
       rssi = bleBeacons[i].rssi;
-      uuid = bleBeacons[i].uuid;
+      uuid = bleBeacons[i].uuid.toString();
     }
   }
 
@@ -143,44 +143,21 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     for (int i = 0; i < SIZEOF(known_beacons); i++) {
       if (service.equals(known_beacons[i])) {
         bleBeacons[i].uuid = service;
-        bleBeacons[i].rssi = advertisedDevice.getRssi();
+        bleBeacons[i].rssi = advertisedDevice.getRSSI();
       }
     }
   }
 };
 
-void setup() {
-  Serial.begin(115200);
+void connectWifi(){
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+  }
+  Serial.println("Connected to Wi-Fi");
+  //Serial.print("IP address: ");
+  //Serial.println(WiFi.localIP());
 
-  //configure for ble
-  BLEDevice::init("");
-
-  pBLEScan = BLEDevice::getScan();
-  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-  pBLEScan->setInterval(1349);
-  pBLEScan->setWindow(449);
-  pBLEScan->setActiveScan(true);
-
-  //Configure for heartrate
-  pulseSensor.analogInput(PulseWire);
-  pulseSensor.blinkOnPulse(LED);  // Blink the onboard LED with a heartbeat.
-  pulseSensor.setThreshold(Threshold);
-  pulseSensor.begin();
-
-  //configure for falldown
-  Wire.begin();
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x6B);  // PWR_MGMT_1 register
-  Wire.write(0);     // Set to zero (wakes up the MPU-6050)
-  Wire.endTransmission(true);
-
-  connectWifi();
-
-  mqttClient.setCallback(onMqttMessage);
-  mqttClient.setServer(mqtt_server, mqtt_port);
-
-  pinMode(vibrationdc, OUTPUT);
-  digitalWrite(vibrationdc, LOW);
 }
 
 //server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic
@@ -212,51 +189,6 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-void loop() {
-  bleBeacons = {0};
-  pBLEScan->start(5, false);
-
-  if (!mqttClient.connected()) {
-    connectToMQTT();
-  }
-  mqttClient.loop();
-
-  // if (doConnect) {
-  //   if (connectToServer()) {
-  //     Serial.println(F("We are now connected to the BLE Server."));
-  //   } else {
-  //     Serial.println(F("Failed to connect to the server."));
-  //   }
-  //   doConnect = false;
-  // }
-
-  const char* locationMessage = nullptr; // Store the location message
-
-  // if (connected) {
-  //   locationMessage = printAndSendRSSI();
-  // } else if (doScan) {
-  //   BLEDevice::getScan()->start(0);
-  // }
-
-  unsigned long currTime_acce = millis();
-  if (currTime_acce - prev_time_acce >= SAMPLE_INTERVAL){
-    prev_time_acce = currTime_acce;
-    falldown();
-  }
-
-  unsigned long currTime_heart = millis();
-  if (currTime_heart - prev_time_heart >= SAMPLE_INTERVAL_HEART){    //100ms
-    prev_time_heart = currTime_heart;
-    heartrate();
-  }
-
-  // NOTE: clear BLEScan buffer to release memory
-  pBLEScan->clearResults();
-
-  // TODO: do we need delay here?
-  // delay(200);
-}
-
 void heartrate() {
   static unsigned long startTime = 0;    // To track the start time of measurement
   static unsigned long lastBeatTime = 0; // Tracks the last time data was sent
@@ -280,20 +212,9 @@ void heartrate() {
       char payload_heart[50];
       snprintf(payload_heart, 50, "{\"BPM\": %d}", myBPM); // Format data as JSON
       mqttClient.publish(mqtt_topic_heart, payload_heart);
-
-      //Check BPM threshold
-      if (myBPM < 30 || myBPM > 140){
-        char heartAlert[60];       // array that hold a maximum of 50 Characters
-        snprintf(heartAlert, 60, "{\"Warning\": \"Abnormal heart BPM\", \"Location\": \"%s\"}", location);
-        mqttClient.publish(mqtt_topic_heartAlert, heartAlert);
-        Serial.println(heartAlert);
-      }
     }
   }
 }
-
-
-
 
 /*
  * TODO: Falling detection algorithm description goes here.
@@ -383,18 +304,6 @@ void falldown() {
   }
 }
 
-
-void connectWifi(){
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-  }
-  Serial.println("Connected to Wi-Fi");
-  //Serial.print("IP address: ");
-  //Serial.println(WiFi.localIP());
-
-}
-
 void mpu_read() {
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3B);  // Starting with register 0x3B (ACCEL_XOUT_H)
@@ -408,3 +317,81 @@ void mpu_read() {
   GyY = Wire.read() << 8 | Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyZ = Wire.read() << 8 | Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
 }
+
+void setup() {
+  Serial.begin(115200);
+
+  //configure for ble
+  BLEDevice::init("");
+
+  pBLEScan = BLEDevice::getScan();
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setInterval(1349);
+  pBLEScan->setWindow(449);
+  pBLEScan->setActiveScan(true);
+
+  //Configure for heartrate
+  pulseSensor.analogInput(PulseWire);
+  pulseSensor.blinkOnPulse(LED);  // Blink the onboard LED with a heartbeat.
+  pulseSensor.setThreshold(Threshold);
+  pulseSensor.begin();
+
+  //configure for falldown
+  Wire.begin();
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B);  // PWR_MGMT_1 register
+  Wire.write(0);     // Set to zero (wakes up the MPU-6050)
+  Wire.endTransmission(true);
+
+  connectWifi();
+
+  mqttClient.setCallback(onMqttMessage);
+  mqttClient.setServer(mqtt_server, mqtt_port);
+
+  pinMode(vibrationdc, OUTPUT);
+  digitalWrite(vibrationdc, LOW);
+}
+
+void loop() {
+  memset(bleBeacons, 0, sizeof(bleBeacons));
+  pBLEScan->start(5, false);
+
+  if (!mqttClient.connected()) {
+    connectToMQTT();
+  }
+  mqttClient.loop();
+
+  // if (doConnect) {
+  //   if (connectToServer()) {
+  //     Serial.println(F("We are now connected to the BLE Server."));
+  //   } else {
+  //     Serial.println(F("Failed to connect to the server."));
+  //   }
+  //   doConnect = false;
+  // }
+
+  // if (connected) {
+  //   locationMessage = printAndSendRSSI();
+  // } else if (doScan) {
+  //   BLEDevice::getScan()->start(0);
+  // }
+
+  unsigned long currTime_acce = millis();
+  if (currTime_acce - prev_time_acce >= SAMPLE_INTERVAL){
+    prev_time_acce = currTime_acce;
+    falldown();
+  }
+
+  unsigned long currTime_heart = millis();
+  if (currTime_heart - prev_time_heart >= SAMPLE_INTERVAL_HEART){    //100ms
+    prev_time_heart = currTime_heart;
+    heartrate();
+  }
+
+  // NOTE: clear BLEScan buffer to release memory
+  pBLEScan->clearResults();
+
+  // TODO: do we need delay here?
+  // delay(200);
+}
+
