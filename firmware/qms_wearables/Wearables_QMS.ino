@@ -1,4 +1,3 @@
-
 #define USE_ARDUINO_INTERRUPTS true    // Set up low-level interrupts for accurate BPM math.
 #include <BLEDevice.h>
 #include <WiFi.h>
@@ -9,6 +8,10 @@
 #include <Wire.h>
 #include <MPU6050.h>                   // Ensure the MPU6050 library is compatible with ESP32.
 #include <math.h>
+
+#define SIZEOF(a) (sizeof(a) / sizeof(*a))
+
+#define DEVICE_UUID "0ea57b2b-8dbe-41cd-9780-f7d1d237839c"
 
 //In the DT house
 const char* ssid = "DT105_2.4GHz@unifi";
@@ -25,7 +28,7 @@ const char* mqtt_server = "192.168.0.7";
 //const char* password = "**********";
 //const char* mqtt_server = "172.20.10.3";
 
-const int mqtt_port = 1883;              
+const int mqtt_port = 1883;
 const char* mqtt_topic_location= "location/RSSI";
 const char* mqtt_topic_heart= "heartRate/BPM";                // Topic to publish heart rate data.
 const char* mqtt_topic_heartAlert = "heartRate/heartAlert";
@@ -36,16 +39,23 @@ const char* mqtt_sub_queue = "queue/status";                  //Topic for queue 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
-//Variables: BLE 
-static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
-static BLEUUID charUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8");
-static boolean doConnect = false;
-static boolean connected = false;
+//Variables: BLE
+const BLEUUID known_beacons[] = {
+  BLEUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8"),
+  BLEUUID("beb5483e-36e1-4688-b7f5-ea07361b26a9")
+};
 static boolean doScan = false;
 static BLERemoteCharacteristic* pRemoteCharacteristic;
 static BLEAdvertisedDevice* myDevice;
 static BLEClient* pClient = nullptr;
 int previousRSSI = 0;
+BLEScan* pBLEScan;
+
+struct BleBeacon {
+  BLEUUID uuid;
+  int rssi;
+};
+BleBeacon bleBeacons[SIZEOF(known_beacons)] = {0};
 
 //Variables: heartrate
 const int PulseWire =34;       // PulseSensor PURPLE WIRE connected to GPIO36 (ADC1_CH0).
@@ -74,27 +84,14 @@ int angleChange = 0;
 unsigned long prev_time_acce, prev_time_queue;
 const int SAMPLE_INTERVAL = 100; // milliseconds
 
-
 unsigned long prev_time_heart;
 const int SAMPLE_INTERVAL_HEART = 100; // milliseconds
-
 
 //Vibration DC motor
 #define vibrationdc 23
 static bool motorActive = false;
 static unsigned long motorStartTime = 0;
 const unsigned long motorVibrationDuration = 500;
-
-
-class MyClientCallback : public BLEClientCallbacks {
-  void onConnect(BLEClient* pclient) {}
-
-  void onDisconnect(BLEClient* pclient) {
-    connected = false;
-//    Serial.println(F("Disconnected from server"));
-  }
-};
-
 
 void connectToMQTT() {
   while (!mqttClient.connected()) {
@@ -114,69 +111,40 @@ void connectToMQTT() {
   }
 }
 
-
-bool connectToServer() {
-
-  pClient = BLEDevice::createClient();
-  pClient->setClientCallbacks(new MyClientCallback());
-  pClient->connect(myDevice);
-  Serial.println(F(" - Connected to server"));
-
-  BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
-  if (pRemoteService == nullptr) {
-  Serial.println(F("Failed to find our service UUID"));
-    pClient->disconnect();
-    return false;
-  }
-
-  pRemoteCharacteristic = pRemoteService->getCharacteristic(charUUID);
-  if (pRemoteCharacteristic == nullptr) {
-    Serial.println(F("Failed to find our characteristic UUID"));
-    pClient->disconnect();
-    return false;
-  }
-
-  connected = true;
-  return true;
-}
-
-const char* printAndSendRSSI() {
-  static char locationMessage[10];
-  if (connected && pClient) {
-    int rssi = pClient->getRssi();
-    
-    if (rssi > -50) {
-      strcpy(locationMessage, "UUID: 1");
-    } else if (rssi <= -50 && rssi > -70) {
-      strcpy(locationMessage, "UUID: 2");
-    } else if (rssi <= -70) {
-      strcpy(locationMessage, "UUID: 3");
+String printAndSendRSSI() {
+  String uuid = NULL;
+  int rssi = 0;
+  for (int i = 0; i < SIZEOF(bleBeacons); i++) {
+    if (uuid == null) {
+      rssi = bleBeacons[i].rssi;
+      uuid = bleBeacons[i].uuid;
+      continue;
     }
 
-    Serial.print(locationMessage);
-
-    if (abs(rssi - previousRSSI) > 5) { // Update only if RSSI varies by 5 dBm or more
-      mqttClient.publish(mqtt_topic_location, locationMessage);
-      previousRSSI = rssi;
+    if (bleBeacons[i].rssi > rssi) {
+      rssi = bleBeacons[i].rssi;
+      uuid = bleBeacons[i].uuid;
     }
-  }else{
-    strcpy(locationMessage, "N/A");
   }
 
-  return locationMessage;
+  mqttClient.publish(mqtt_topic_location, uuid.c_str());
+
+  return uuid;
 }
 
-      
+
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
+    BLEUUID service = advertisedDevice.getServiceUUID();
     Serial.print(F("BLE Advertised Device found: "));
     Serial.println(advertisedDevice.toString().c_str());
 
-    if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID)) {
-      BLEDevice::getScan()->stop();
-      myDevice = new BLEAdvertisedDevice(advertisedDevice);
-      doConnect = true;
-      doScan = true;
+
+    for (int i = 0; i < SIZEOF(known_beacons); i++) {
+      if (service.equals(known_beacons[i])) {
+        bleBeacons[i].uuid = service;
+        bleBeacons[i].rssi = advertisedDevice.getRssi();
+      }
     }
   }
 };
@@ -184,21 +152,19 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 void setup() {
   Serial.begin(115200);
 
-  //configure for ble 
+  //configure for ble
   BLEDevice::init("");
 
-  BLEScan* pBLEScan = BLEDevice::getScan();
+  pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
-  pBLEScan->start(5, false);
 
   //Configure for heartrate
-  pulseSensor.analogInput(PulseWire);   
+  pulseSensor.analogInput(PulseWire);
   pulseSensor.blinkOnPulse(LED);  // Blink the onboard LED with a heartbeat.
   pulseSensor.setThreshold(Threshold);
-
   pulseSensor.begin();
 
   //configure for falldown
@@ -217,70 +183,78 @@ void setup() {
   digitalWrite(vibrationdc, LOW);
 }
 
-//server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic and controlling the (outside exp: LED). The string variable 'messageTemp' holds the MQTT message.
+//server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic
+//and controlling the (outside exp: LED). The string variable 'messageTemp' holds the MQTT message.
 void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   unsigned long currTime_queue = millis();
-      if (currTime_queue - prev_time_queue >= SAMPLE_INTERVAL){
-          prev_time_queue = currTime_queue;
-          Serial.println("\n Publish received.");
-          Serial.print("Topic: ");
-          Serial.println(topic);
-          String messageTemp;
-          for (int i = 0; i < length; i++){
-            messageTemp += (char)payload[i];
-          }
-          Serial.print("Message: ");
-          Serial.println(messageTemp);
-          
-          digitalWrite(vibrationdc, HIGH);
-          motorActive = true;
-          motorStartTime = millis();
-        }
-              //Turn off motor after the set duration
-    if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
-      digitalWrite(vibrationdc, LOW);
-      motorActive = false;
+
+  if (currTime_queue - prev_time_queue >= SAMPLE_INTERVAL) {
+    prev_time_queue = currTime_queue;
+    Serial.println("\n Publish received.");
+    Serial.print("Topic: ");
+    Serial.println(topic);
+    String messageTemp;
+    for (int i = 0; i < length; i++){
+      messageTemp += (char)payload[i];
+    }
+    Serial.print("Message: ");
+    Serial.println(messageTemp);
+
+    digitalWrite(vibrationdc, HIGH);
+    motorActive = true;
+    motorStartTime = millis();
+  }
+
+  //Turn off motor after the set duration
+  if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
+    digitalWrite(vibrationdc, LOW);
+    motorActive = false;
   }
 }
 
 void loop() {
+  bleBeacons = {0};
+  pBLEScan->start(5, false);
 
   if (!mqttClient.connected()) {
     connectToMQTT();
   }
   mqttClient.loop();
-  
-  if (doConnect) {
-    if (connectToServer()) {
-      Serial.println(F("We are now connected to the BLE Server."));
-    } else {
-      Serial.println(F("Failed to connect to the server."));
-    }
-    doConnect = false;
-  }
+
+  // if (doConnect) {
+  //   if (connectToServer()) {
+  //     Serial.println(F("We are now connected to the BLE Server."));
+  //   } else {
+  //     Serial.println(F("Failed to connect to the server."));
+  //   }
+  //   doConnect = false;
+  // }
 
   const char* locationMessage = nullptr; // Store the location message
-  
-  if (connected) {
-    locationMessage = printAndSendRSSI();
-  } else if (doScan) {
-    BLEDevice::getScan()->start(0);
-  }
+
+  // if (connected) {
+  //   locationMessage = printAndSendRSSI();
+  // } else if (doScan) {
+  //   BLEDevice::getScan()->start(0);
+  // }
 
   unsigned long currTime_acce = millis();
-      if (currTime_acce - prev_time_acce >= SAMPLE_INTERVAL){
-          prev_time_acce = currTime_acce;
-           falldown(); 
-      }
-    
-  unsigned long currTime_heart = millis();
-      if (currTime_heart - prev_time_heart >= SAMPLE_INTERVAL_HEART){    //100ms
-          prev_time_heart = currTime_heart;
-           heartrate();
-      }
-     
+  if (currTime_acce - prev_time_acce >= SAMPLE_INTERVAL){
+    prev_time_acce = currTime_acce;
+    falldown();
+  }
 
-  delay(200);
+  unsigned long currTime_heart = millis();
+  if (currTime_heart - prev_time_heart >= SAMPLE_INTERVAL_HEART){    //100ms
+    prev_time_heart = currTime_heart;
+    heartrate();
+  }
+
+  // NOTE: clear BLEScan buffer to release memory
+  pBLEScan->clearResults();
+
+  // TODO: do we need delay here?
+  // delay(200);
 }
 
 void heartrate() {
@@ -288,27 +262,27 @@ void heartrate() {
   static unsigned long lastBeatTime = 0; // Tracks the last time data was sent
   const unsigned long interval = 500;   // Delay interval in milliseconds (adjust as needed)
   int myBPM = pulseSensor.getBeatsPerMinute();
-  
+
   if (pulseSensor.sawStartOfBeat()) {
     if (!recordingStarted){
       if(startTime == 0){
-      startTime = millis(); 
+        startTime = millis();
       }
-     if (millis() - startTime >= 4000) {
-          Serial.print(" | Heart Rate: N/A");
-          recordingStarted = true; // Enable recording after 7 secondsM
-          Serial.println("Recording started. Data will now be sent to the MQTT server.");
+      if (millis() - startTime >= 4000) {
+        Serial.print(" | Heart Rate: N/A");
+        recordingStarted = true; // Enable recording after 7 secondsM
+        Serial.println("Recording started. Data will now be sent to the MQTT server.");
       }
     } else if (millis() - lastBeatTime >= interval) {
-        lastBeatTime = millis(); // Update the last beat time
-        Serial.print(" | Heart Rate: ");
-        Serial.println(myBPM);
-        char payload_heart[50];
-        snprintf(payload_heart, 50, "{\"BPM\": %d}", myBPM); // Format data as JSON
-        mqttClient.publish(mqtt_topic_heart, payload_heart);
-   
+      lastBeatTime = millis(); // Update the last beat time
+      Serial.print(" | Heart Rate: ");
+      Serial.println(myBPM);
+      char payload_heart[50];
+      snprintf(payload_heart, 50, "{\"BPM\": %d}", myBPM); // Format data as JSON
+      mqttClient.publish(mqtt_topic_heart, payload_heart);
+
       //Check BPM threshold
-      if (myBPM < 30 || myBPM > 140){  
+      if (myBPM < 30 || myBPM > 140){
         char heartAlert[60];       // array that hold a maximum of 50 Characters
         snprintf(heartAlert, 60, "{\"Warning\": \"Abnormal heart BPM\", \"Location\": \"%s\"}", location);
         mqttClient.publish(mqtt_topic_heartAlert, heartAlert);
@@ -321,95 +295,92 @@ void heartrate() {
 
 
 
-void falldown(){
-    mpu_read();
-    ax = (AcX - 2050) / 16384.00;
-    ay = (AcY - 77) / 16384.00;
-    az = (AcZ - 1947) / 16384.00;
-    gx = (GyX + 270) / 131.07;
-    gy = (GyY - 351) / 131.07;
-    gz = (GyZ + 136) / 131.07;
-    // Calculating Amplitude Vector for 3-axis
-    float raw_amplitude = pow(pow(ax, 2) + pow(ay, 2) + pow(az, 2), 0.5);
-    float amplitude = raw_amplitude * 10;  // Multiplied by 10 because values are between 0 to 1
-   
-    Serial.print(" | Amplitude: ");
-    Serial.println(amplitude);
-      // Publish acceleration magnitude to MQTT
-    char payload_amplitude[50];
-    snprintf(payload_amplitude, 50, "{\"Amplitude\": %.2f}", amplitude);
-    mqttClient.publish(mqtt_topic_amplitude, payload_amplitude);
+/*
+ * TODO: Falling detection algorithm description goes here.
+ */
+void falldown() {
+  mpu_read();
+  ax = (AcX - 2050) / 16384.00;
+  ay = (AcY - 77) / 16384.00;
+  az = (AcZ - 1947) / 16384.00;
+  gx = (GyX + 270) / 131.07;
+  gy = (GyY - 351) / 131.07;
+  gz = (GyZ + 136) / 131.07;
+  // Calculating Amplitude Vector for 3-axis
+  float raw_amplitude = pow(pow(ax, 2) + pow(ay, 2) + pow(az, 2), 0.5);
+  float amplitude = raw_amplitude * 10;  // Multiplied by 10 because values are between 0 to 1
 
-    if (amplitude <= 2 && trigger2 == false) { // If AM breaks lower threshold (0.4g)
+  Serial.print(" | Amplitude: ");
+  Serial.println(amplitude);
+  // Publish acceleration magnitude to MQTT
+  char payload_amplitude[50];
+  snprintf(payload_amplitude, 50, "{\"Amplitude\": %.2f}", amplitude);
+  mqttClient.publish(mqtt_topic_amplitude, payload_amplitude);
+
+  if (amplitude <= 2 && trigger2 == false) { // If AM breaks lower threshold (0.4g)
     trigger1 = true;
     //Serial.println("TRIGGER 1 ACTIVATED");
-    }
-    if (trigger1 == true) {     // Detects initial potential fall
-      trigger1count++;
-      if (amplitude >= 12) { // If AM breaks upper threshold (3g)
-        trigger2 = true;
-    //    Serial.println("TRIGGER 2 ACTIVATED");
-        trigger1 = false; trigger1count = 0;
-      }
-    }
-    if (trigger2 == true) {   // Detects high amplitude (impact)
-      trigger2count++;
-      angleChange = pow(pow(gx, 2) + pow(gy, 2) + pow(gz, 2), 0.5);
-      Serial.println(angleChange);
-      if (angleChange >= 30 && angleChange <= 400) { // If orientation changes by between 80-100 degrees
-        trigger3 = true; trigger2 = false; trigger2count = 0;
-    //    Serial.println(angleChange);
-    //    Serial.println("TRIGGER 3 ACTIVATED");
-      }
-    }
-    if (trigger3 == true) {   // Monitors orientation changes (e.g. lying on the ground)
-      trigger3count++;
-      if (trigger3count >= 10) {
-        angleChange = pow(pow(gx, 2) + pow(gy, 2) + pow(gz, 2), 0.5);
-   //     Serial.println(angleChange);
-        if ((angleChange >= 0) && (angleChange <= 10)) { // If orientation changes remain between 0-10 degrees
-          fall = true; trigger3 = false; trigger3count = 0;
-   //       Serial.println(angleChange);
-        } 
-        
-        else { // User regained normal orientation
-          trigger3 = false; trigger3count = 0;
-   //       Serial.println("TRIGGER 3 DEACTIVATED");
-        }
-      }
-    }
-
-    if (fall == true && !motorActive) { // In the event of a fall detection
-
-      Serial.println("Fall detected!");
-      // Additional logic for alerts (e.g., buzzer, SMS, LED)
-       // Publish fall detection event to MQTT
-      digitalWrite(vibrationdc, HIGH);
-      motorActive = true;
-      motorStartTime = millis();
-
-      const char* location = printAndSendRSSI();
-      char fallAlert[60];
-      snprintf(fallAlert, 60, "{\"falling_event\": true, \"location\": \"%s\"}", location);
-      mqttClient.publish(mqtt_topic_fallAlert, fallAlert);
-      Serial.println(fallAlert);
-      fall = false;
-    }
-
-        //Turn off motor after the set duration
-    if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
-      digitalWrite(vibrationdc, LOW);
-      motorActive = false;
-    }
-    
-    if (trigger2count >= 6) { // Allow 0.5s for orientation change
-      trigger2 = false; trigger2count = 0;
-   //   Serial.println("TRIGGER 2 DEACTIVATED");
-    }
-    if (trigger1count >= 6) { // Allow 0.5s for AM to break upper threshold
+  }
+  if (trigger1 == true) {     // Detects initial potential fall
+    trigger1count++;
+    if (amplitude >= 12) { // If AM breaks upper threshold (3g)
+      trigger2 = true;
+      //    Serial.println("TRIGGER 2 ACTIVATED");
       trigger1 = false; trigger1count = 0;
-  //    Serial.println("TRIGGER 1 DEACTIVATED");
     }
+  }
+  if (trigger2 == true) {   // Detects high amplitude (impact)
+    trigger2count++;
+    angleChange = pow(pow(gx, 2) + pow(gy, 2) + pow(gz, 2), 0.5);
+    Serial.println(angleChange);
+    if (angleChange >= 30 && angleChange <= 400) { // If orientation changes by between 80-100 degrees
+      trigger3 = true; trigger2 = false; trigger2count = 0;
+      //    Serial.println(angleChange);
+      //    Serial.println("TRIGGER 3 ACTIVATED");
+    }
+  }
+  if (trigger3 == true) {   // Monitors orientation changes (e.g. lying on the ground)
+    trigger3count++;
+    if (trigger3count >= 10) {
+      angleChange = pow(pow(gx, 2) + pow(gy, 2) + pow(gz, 2), 0.5);
+      //     Serial.println(angleChange);
+      if ((angleChange >= 0) && (angleChange <= 10)) { // If orientation changes remain between 0-10 degrees
+        fall = true; trigger3 = false; trigger3count = 0;
+        //       Serial.println(angleChange);
+      }
+
+      else { // User regained normal orientation
+        trigger3 = false; trigger3count = 0;
+        //       Serial.println("TRIGGER 3 DEACTIVATED");
+      }
+    }
+  }
+
+  if (fall == true && !motorActive) { // In the event of a fall detection
+
+    Serial.println("Fall detected!");
+    // Additional logic for alerts (e.g., buzzer, SMS, LED)
+    // Publish fall detection event to MQTT
+
+    String location = printAndSendRSSI();
+    String fallAlert = String("{\"uuid\": \"");
+    fallAlert.concat(DEVICE_UUID);
+    fallAlert.concat("\", \"data\": { \"location\": \"");
+    fallAlert.concat(location);
+    fallAlert.concat("\"}}");
+    mqttClient.publish(mqtt_topic_fallAlert, fallAlert.c_str());
+    Serial.println(fallAlert);
+    fall = false;
+  }
+
+  if (trigger2count >= 6) { // Allow 0.5s for orientation change
+    trigger2 = false; trigger2count = 0;
+    //   Serial.println("TRIGGER 2 DEACTIVATED");
+  }
+  if (trigger1count >= 6) { // Allow 0.5s for AM to break upper threshold
+    trigger1 = false; trigger1count = 0;
+    //    Serial.println("TRIGGER 1 DEACTIVATED");
+  }
 }
 
 
@@ -429,7 +400,7 @@ void mpu_read() {
   Wire.write(0x3B);  // Starting with register 0x3B (ACCEL_XOUT_H)
   Wire.endTransmission(false);
   Wire.requestFrom(MPU_addr, 14, true);  // Request a total of 14 registers
-  AcX = Wire.read() << 8 | Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
+  AcX = Wire.read() << 8 | Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
   AcY = Wire.read() << 8 | Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
   AcZ = Wire.read() << 8 | Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
   Tmp = Wire.read() << 8 | Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
