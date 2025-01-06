@@ -22,7 +22,7 @@ const char* mqtt_server = "192.168.0.7";
 
 ////Ng
 //const char* ssid = "Michael NG";
-//const char* password = "weihan123456";
+//const char* password = "**********";
 //const char* mqtt_server = "172.20.10.3";
 
 const int mqtt_port = 1883;              
@@ -166,22 +166,6 @@ const char* printAndSendRSSI() {
   return locationMessage;
 }
 
-//server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic and controlling the (outside exp: LED). The string variable 'messageTemp' holds the MQTT message.
-void onMqttMessage(char* topic, byte* payload, unsigned int length) {
-  unsigned long currTime_queue = millis();
-      if (currTime_queue - prev_time_queue >= SAMPLE_INTERVAL){
-          prev_time_queue = currTime_queue;
-          Serial.println("\n Publish received.");
-          Serial.print("Topic: ");
-          Serial.println(topic);
-          String messageTemp;
-          for (int i = 0; i < length; i++){
-            messageTemp += (char)payload[i];
-          }
-          Serial.print("Message: ");
-          Serial.println(messageTemp);
-   }
-}
       
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
@@ -233,6 +217,32 @@ void setup() {
   digitalWrite(vibrationdc, LOW);
 }
 
+//server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic and controlling the (outside exp: LED). The string variable 'messageTemp' holds the MQTT message.
+void onMqttMessage(char* topic, byte* payload, unsigned int length) {
+  unsigned long currTime_queue = millis();
+      if (currTime_queue - prev_time_queue >= SAMPLE_INTERVAL){
+          prev_time_queue = currTime_queue;
+          Serial.println("\n Publish received.");
+          Serial.print("Topic: ");
+          Serial.println(topic);
+          String messageTemp;
+          for (int i = 0; i < length; i++){
+            messageTemp += (char)payload[i];
+          }
+          Serial.print("Message: ");
+          Serial.println(messageTemp);
+          
+          digitalWrite(vibrationdc, HIGH);
+          motorActive = true;
+          motorStartTime = millis();
+        }
+              //Turn off motor after the set duration
+    if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
+      digitalWrite(vibrationdc, LOW);
+      motorActive = false;
+  }
+}
+
 void loop() {
 
   if (!mqttClient.connected()) {
@@ -269,26 +279,11 @@ void loop() {
            heartrate();
       }
      
-//Serial.print(" | Amplitude: ");
-//  Serial.print(ax, 2);
-//  Serial.print(",");
-//  Serial.print(ay, 2);
-//  Serial.print(",");
-//  Serial.print(az, 2);
-//  Serial.print(" | Trigger1: ");
-//  Serial.print(trigger1);
-//  Serial.print(" | Trigger2: ");
-//  Serial.print(trigger2);
-//  Serial.print(" | Trigger3: ");
-//  Serial.println(trigger3);
 
   delay(200);
 }
 
-
-
-void heartrate(){
-
+void heartrate() {
   static unsigned long startTime = 0;    // To track the start time of measurement
   static unsigned long lastBeatTime = 0; // Tracks the last time data was sent
   const unsigned long interval = 500;   // Delay interval in milliseconds (adjust as needed)
@@ -299,7 +294,7 @@ void heartrate(){
       if(startTime == 0){
       startTime = millis(); 
       }
-     if (millis() - startTime >= 7000) {
+     if (millis() - startTime >= 4000) {
           Serial.print(" | Heart Rate: N/A");
           recordingStarted = true; // Enable recording after 7 secondsM
           Serial.println("Recording started. Data will now be sent to the MQTT server.");
@@ -313,13 +308,7 @@ void heartrate(){
         mqttClient.publish(mqtt_topic_heart, payload_heart);
    
       //Check BPM threshold
-      if (myBPM < 30 || myBPM > 140 && !motorActive){
-        digitalWrite(vibrationdc, HIGH);
-        motorActive = true;
-        motorStartTime = millis();
-  
-        const char* location = printAndSendRSSI();
-        
+      if (myBPM < 30 || myBPM > 140){  
         char heartAlert[60];       // array that hold a maximum of 50 Characters
         snprintf(heartAlert, 60, "{\"Warning\": \"Abnormal heart BPM\", \"Location\": \"%s\"}", location);
         mqttClient.publish(mqtt_topic_heartAlert, heartAlert);
@@ -327,12 +316,9 @@ void heartrate(){
       }
     }
   }
-    //Turn off motor after the set duration
-    if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
-      digitalWrite(vibrationdc, LOW);
-      motorActive = false;
-  }
 }
+
+
 
 
 void falldown(){
