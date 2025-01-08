@@ -34,7 +34,7 @@ pub async fn monitor_status(
                             uuid: recv.uuid,
                             device_name: device_name.unwrap().device_name,
                             topic: recv.topic,
-                            data: recv.data.get("bpm").unwrap_or(&"-1".to_string()).to_string(),
+                            data: recv.data.get("BPM").unwrap_or(&"-1".to_string()).to_string(),
                         }).unwrap());
                     },
                     "accelerometer/fall" => {

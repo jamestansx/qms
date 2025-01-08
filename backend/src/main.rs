@@ -31,7 +31,7 @@ async fn init_db(db_uri: &str) -> Result<SqlitePool, sqlx::Error> {
 }
 
 async fn init_mqtt_client() -> Result<(AsyncClient, EventLoop), rumqttc::ClientError> {
-    let mut mqtt_opts = MqttOptions::new("ble32", "0.0.0.0", 6969);
+    let mut mqtt_opts = MqttOptions::new("qms_server_mqtt", "172.20.10.3", 1883);
     mqtt_opts.set_keep_alive(Duration::from_secs(5));
     let (cl, event_loop) = AsyncClient::new(mqtt_opts, 10);
     cl.subscribe("heartRate/BPM", QoS::AtMostOnce).await?;
@@ -48,7 +48,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let pool = init_db("sqlite://qms.db").await?;
 
-    // TODO: add tx to app state
     let (tx, mut rx) = broadcast::channel(100);
     let (tx_subs, _) = broadcast::channel::<MqttPayload>(100);
     let iot = IotState {
@@ -103,10 +102,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    let cors = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST])
-        .allow_origin(Any);
-
     let app = Router::new()
         .nest("/api/v1", make_routes(state))
         .layer(
@@ -124,10 +119,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 })
                 .on_failure(()),
         )
-        .layer(cors)
         .layer(CorsLayer::permissive());
 
-    let listener = TcpListener::bind("0.0.0.0:8000").await?;
+    let listener = TcpListener::bind("172.20.10.5:8000").await?;
     tracing::debug!("listening on {}", listener.local_addr()?);
     let server = task::spawn(async { axum::serve(listener, app).await });
 

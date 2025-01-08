@@ -85,7 +85,13 @@ fn update_queue(
             },
         );
         if tx.send(format!("{}", queue_no)).is_ok() {
-            if priority_queue.len() == 1 {
+            if priority_queue.len() == 1
+                || priority_queue
+                    .peek()
+                    .and_then(|x| Some(x.1.queue_no))
+                    .unwrap()
+                    != queue_no
+            {
                 status.send(format!("{}", queue_no)).unwrap();
             }
             next_queue_no.fetch_add(1, Ordering::Relaxed);
