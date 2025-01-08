@@ -132,6 +132,9 @@
 #define LED_Green   12
 #define LED_Blue    13
 
+#define MAX_HTTP_OUTPUT_BUFFER 2048
+#define MIN(x, y) ((x < y) ? x : y)
+
 // creating a task handle
 TaskHandle_t QRCodeReader_Task; 
 
@@ -172,8 +175,10 @@ const char *scannedUUID = ""; // Store UUID after QR code is read
 
 /* ======================================== Replace with your network credentials */
 
-const char* ssid = "DT105_2.4GHz@unifi";
-const char* password = "112233DT";
+//const char* ssid = "DT105_2.4GHz@unifi";
+//const char* password = "112233DT";
+const char* ssid = "Michael NG";
+const char* password = "weihan123456";
 /* ======================================== */
 
 /* ======================================== */
@@ -625,15 +630,38 @@ void startCameraWebServer(){
 }
 /* ________________________________________________________________________________ */
 
+esp_err_t _http_ev_handler(esp_http_client_event_t *ev)
+{
+  static char *out_buf;
+
+  if (ev->event_id != HTTP_EVENT_ON_DATA) {
+    return ESP_OK;
+  }
+
+  if (esp_http_client_is_chunked_response(ev->client)) {
+    return ESP_OK;
+  }
+
+  Serial.println("I2C transmission started");
+  Wire.beginTransmission(4);
+  Wire.write((const uint8_t*)ev->data,ev->data_len);
+  Wire.endTransmission();
+
+  return ESP_OK;
+}
+
 
 //Client POST
 void perform_post_request(const char *uuid){
   // Create JSON body with the UUID
-  char post_data[128];
-  snprintf(post_data, sizeof(post_data), "{\"uuid\": \%s\"}", uuid);
+  String json_str = String("{\"uuid\": \"");
+  json_str += String(uuid);
+  json_str += String("\"}");
+  Serial.println(json_str);
 
   esp_http_client_config_t config = {
-    .url = "http://192.168.0.2:3000/api/v1/queues/verify", //Full URL
+    .url = "http://172.20.10.5:8000/api/v1/queues/verify", //Full URL
+    .event_handler = _http_ev_handler,
   };
 
   esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -647,7 +675,9 @@ void perform_post_request(const char *uuid){
   esp_http_client_set_method(client, HTTP_METHOD_POST);
 
   // Set POST body
-  esp_http_client_set_post_field(client, post_data, strlen(post_data));
+  Serial.print("POST data: ");
+  Serial.println(json_str);
+  esp_http_client_set_post_field(client, json_str.c_str(), json_str.length() + 1);
 
   // Add headers if necessary (e.g., Content-Type)
   esp_http_client_set_header(client, "Content-Type", "application/json");
@@ -665,6 +695,7 @@ void perform_post_request(const char *uuid){
   // Clean up
   esp_http_client_cleanup(client);
 }
+
 
 
 
@@ -811,10 +842,10 @@ void loop() {
   }
 
   //If QR code is detected, send HTTP POST request
-  if (qrCodeDetected){
-    qrCodeDetected = false;
-    perform_post_request(scannedUUID);
-  }
+//  if (qrCodeDetected){
+//    qrCodeDetected = false;
+//    perform_post_request(scannedUUID);
+//  }
 }
 /* ________________________________________________________________________________ */
 
@@ -884,9 +915,7 @@ void QRCodeReader( void * pvParameters ){
 /* ________________________________________________________________________________ Function to display the results of reading the QR Code on the serial monitor. */
 void dumpData(const struct quirc_data *data)
 {
-    Wire.beginTransmission(4);
-    Wire.write((const uint8_t*)data->payload,data->payload_len);
-    Wire.endTransmission();
+
     Serial.printf("-Version: %d\n", data->version);
     Serial.printf("-ECC level: %c\n", "MLHQ"[data->ecc_level]);
     Serial.printf("-Mask: %d\n", data->mask);
@@ -894,7 +923,7 @@ void dumpData(const struct quirc_data *data)
     Serial.printf("-Payload: %s\n", data->payload);
   
   QRCodeResult = (const char *)data->payload;
-
+  perform_post_request((const char *)data->payload);
 
   cmd_execution();
 }
