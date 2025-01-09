@@ -9,6 +9,12 @@ pub struct QueuePriority {
     pub appointment_time_utc: NaiveDateTime,
 }
 
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct Queue {
+    pub appointment_uuid: uuid::Uuid,
+    pub wearable_uuid: Option<uuid::Uuid>,
+}
+
 impl Ord for QueuePriority {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         let elder = (self.age >= 65, other.age >= 65);

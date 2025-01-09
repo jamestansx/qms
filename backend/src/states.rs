@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::RwLock;
 
+use crate::queue::Queue;
 use crate::queue::QueuePriority;
 use priority_queue::PriorityQueue;
 use serde::Deserialize;
@@ -21,7 +22,7 @@ pub type SharedDb = sqlx::Pool<sqlx::Sqlite>;
 
 pub type SharedAppState = Arc<AppState>;
 
-pub type SharedQueue = Arc<RwLock<PriorityQueue<String, QueuePriority>>>;
+pub type SharedQueue = Arc<RwLock<PriorityQueue<Queue, QueuePriority>>>;
 
 pub type SharedVerifier = Arc<RwLock<HashMap<uuid::Uuid, broadcast::Sender<String>>>>;
 
@@ -30,11 +31,11 @@ pub struct QueueState {
     pub next_queue_no: AtomicUsize,
     pub verifier: SharedVerifier,
     pub queue: SharedQueue,
-    pub status: broadcast::Sender<String>,
+    pub status: broadcast::Sender<Option<(usize, Option<String>)>>,
 }
 
 impl AppState {
-    pub fn new(db: SharedDb, tx: broadcast::Sender<String>, iot: IotState) -> AppState {
+    pub fn new(db: SharedDb, tx: broadcast::Sender<Option<(usize, Option<String>)>>, iot: IotState) -> AppState {
         AppState {
             db,
             queue: QueueState::new(tx),
@@ -44,7 +45,7 @@ impl AppState {
 }
 
 impl QueueState {
-    pub fn new(tx: broadcast::Sender<String>) -> QueueState {
+    pub fn new(tx: broadcast::Sender<Option<(usize, Option<String>)>>) -> QueueState {
         QueueState {
             next_queue_no: AtomicUsize::new(1),
             verifier: Arc::new(RwLock::new(HashMap::new())),
@@ -56,6 +57,7 @@ impl QueueState {
 
 pub struct IotState {
     pub tx_subscribe: broadcast::Sender<MqttPayload>,
+    pub wearables: Arc<RwLock<HashMap<uuid::Uuid, Option<usize>>>>,
 }
 
 //  {

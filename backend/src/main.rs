@@ -1,8 +1,12 @@
-use std::{str::FromStr, sync::Arc, time::Duration};
+use std::{
+    collections::HashMap,
+    str::FromStr,
+    sync::{Arc, RwLock},
+    time::Duration,
+};
 
 use axum::{
     extract::{MatchedPath, Request},
-    http::Method,
     Router,
 };
 use routes::make_routes;
@@ -10,10 +14,7 @@ use rumqttc::{mqttbytes::QoS, AsyncClient, Event, EventLoop, MqttOptions};
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use states::*;
 use tokio::{net::TcpListener, sync::broadcast, task};
-use tower_http::{
-    cors::{Any, CorsLayer},
-    trace::TraceLayer,
-};
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod error;
@@ -52,6 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (tx_subs, _) = broadcast::channel::<MqttPayload>(100);
     let iot = IotState {
         tx_subscribe: tx_subs.clone(),
+        wearables: Arc::new(RwLock::new(HashMap::new())),
     };
     let state = Arc::new(AppState::new(pool, tx, iot));
 
@@ -60,9 +62,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mqtt_client = task::spawn(async move {
         loop {
             if let Ok(recv) = rx.try_recv() {
-                cl.publish("server/queue", QoS::AtLeastOnce, false, recv)
-                    .await
-                    .ok();
+                if let Some(recv) = recv.map(|x| x.1).unwrap_or(None) {
+                    cl.publish("server/queue", QoS::AtLeastOnce, false, recv)
+                        .await
+                        .ok();
+                }
             }
 
             let notif = event_loop.poll().await;

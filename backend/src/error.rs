@@ -4,6 +4,7 @@ use serde::Serialize;
 pub enum AppError {
     JsonRejection(JsonRejection),
     SqlxError(sqlx::Error),
+    CustomError(String),
 }
 
 impl IntoResponse for AppError {
@@ -26,6 +27,7 @@ impl IntoResponse for AppError {
                     "Database went BRUHHHHH".into(),
                 ),
             },
+            AppError::CustomError(str) => (StatusCode::NOT_FOUND, str.into()),
         };
 
         (status, Json(ErrResponse { message })).into_response()
@@ -41,5 +43,11 @@ impl From<JsonRejection> for AppError {
 impl From<sqlx::Error> for AppError {
     fn from(value: sqlx::Error) -> Self {
         Self::SqlxError(value)
+    }
+}
+
+impl From<&str> for AppError {
+    fn from(value: &str) -> Self {
+        Self::CustomError(value.into())
     }
 }
