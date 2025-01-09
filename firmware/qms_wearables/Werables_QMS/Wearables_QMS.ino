@@ -81,7 +81,7 @@ byte trigger3count = 0; // Stores the counts past since trigger 3 was set true
 int angleChange = 0;
 
 //Time intervals for each operation
-unsigned long prev_time_acce, prev_time_queue, prev_time_scan;
+unsigned long prev_time_acce, prev_time_scan;
 const int SAMPLE_INTERVAL = 100; // milliseconds
 
 unsigned long prev_time_heart;
@@ -163,20 +163,17 @@ void connectWifi(){
 //server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic
 //and controlling the (outside exp: LED). The string variable 'messageTemp' holds the MQTT message.
 void onMqttMessage(char* topic, byte* payload, unsigned int length) {
-  unsigned long currTime_queue = millis();
+  Serial.println("\n Publish received.");
+  Serial.print("Topic: ");
+  Serial.println(topic);
+  String messageTemp;
+  for (int i = 0; i < length; i++){
+    messageTemp += (char)payload[i];
+  }
+  Serial.print("Message: ");
+  Serial.println(messageTemp);
 
-  if (currTime_queue - prev_time_queue >= SAMPLE_INTERVAL) {
-    prev_time_queue = currTime_queue;
-    Serial.println("\n Publish received.");
-    Serial.print("Topic: ");
-    Serial.println(topic);
-    String messageTemp;
-    for (int i = 0; i < length; i++){
-      messageTemp += (char)payload[i];
-    }
-    Serial.print("Message: ");
-    Serial.println(messageTemp);
-
+  if (strncmp(DEVICE_UUID, messageTemp) == 0) {
     digitalWrite(vibrationdc, HIGH);
     motorActive = true;
     motorStartTime = millis();
