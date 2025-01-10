@@ -41,8 +41,8 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
         stream: stream,
         builder: (BuildContext context, AsyncSnapshot<SSEModel> snapshot) {
           if (snapshot.hasData) {
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              showDialog(
+            SchedulerBinding.instance.addPostFrameCallback((_) async {
+              await showDialog(
                   context: context,
                   barrierDismissible: false,
                   builder: (_) {
@@ -55,16 +55,19 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.pushReplacement<void, void>(
-                              context,
-                              QueueStatusPage.route(snapshot.data!.data!),
-                            );
+                            Navigator.pop(context);
                           },
                           child: const Text("Ok"),
                         ),
                       ],
                     );
                   });
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement<void, void>(
+                context,
+                QueueStatusPage.route(snapshot.data!.data!),
+              );
             });
           }
           return Center(

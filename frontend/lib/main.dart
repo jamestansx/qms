@@ -1,11 +1,44 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:qms/authentication/bloc/auth_bloc.dart';
 import 'package:qms/authentication/services/authentication.dart';
 import 'package:qms/authentication/view/login_page.dart';
 import 'package:qms/home/view/homepage.dart';
+import 'package:qms/queue/view/queue_status_page.dart';
 
-void main() {
+int id = 0;
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+final StreamController<NotificationResponse> selectNotificationStream =
+    StreamController<NotificationResponse>.broadcast();
+String? selectedNotifPayload;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final AndroidInitializationSettings initSettingsAndroid =
+      AndroidInitializationSettings("@mipmap/ic_launcher");
+
+  final InitializationSettings initSettings = InitializationSettings(
+    android: initSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initSettings,
+    onDidReceiveNotificationResponse: selectNotificationStream.add,
+  );
+
+  final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
+  if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+    selectedNotifPayload = notificationAppLaunchDetails!.notificationResponse?.payload;
+  }
+
   runApp(const QmsApp());
 }
 
@@ -23,11 +56,35 @@ class _QmsAppState extends State<QmsApp> {
   void initState() {
     super.initState();
     _authRepo = AuthRepo();
+
+    _isAndroidPermissionGranted();
+    _requestPermission();
+  }
+
+  Future<void> _isAndroidPermissionGranted() async {
+    if (Platform.isAndroid) {
+      final bool granted = await flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>()
+              ?.areNotificationsEnabled() ??
+          false;
+    }
+  }
+
+  Future<void> _requestPermission() async {
+    if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImpl =
+          flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      final bool? grantedNotifPermission =
+          await androidImpl?.requestNotificationsPermission();
+    }
   }
 
   @override
   void dispose() {
     _authRepo.dispose();
+    selectNotificationStream.close();
     super.dispose();
   }
 
@@ -70,7 +127,12 @@ class _AppViewState extends State<AppView> {
           listener: (context, state) {
             switch (state.status) {
               case AuthStatus.authenticated:
-                _nav.pushAndRemoveUntil(HomePage.route(), (_) => false);
+                {
+                  if (selectedNotifPayload != null) {
+                    QueueStatusPage.route(selectedNotifPayload!);
+                  }
+                  _nav.pushAndRemoveUntil(HomePage.route(), (_) => false);
+                }
               case AuthStatus.unauthenticated:
                 _nav.pushAndRemoveUntil(LoginPage.route(), (_) => false);
               case AuthStatus.failure:

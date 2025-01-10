@@ -37,11 +37,10 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, state) {
         if (state.streamData != null) {
           if (state.streamData!.topic == "accelerometer/fall" &&
-              state.wearables
-                  .any((e) => e.deviceName == state.streamData!.deviceName)) {
-            setState(() {
-              location = state.streamData!.data;
-            });
+              state.wearables.any(
+                (e) => e.deviceName == state.streamData!.deviceName,
+              )) {
+            location = state.streamData!.data;
           }
           return SizedBox(
             child: SingleChildScrollView(

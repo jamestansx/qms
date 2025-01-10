@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qms/appointment/bloc/appointment_bloc.dart';
+import 'package:qms/appointment/services/appointment.dart';
 import 'package:qms/appointment/view/appointment_list_page.dart';
 import 'package:qms/authentication/bloc/auth_bloc.dart';
 
@@ -56,6 +58,11 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final patientId = context.read<AuthBloc>().state.patient!.id;
+    return BlocProvider(
+      create: (_) => AppointmentBloc(appointmentRepo: AppointmentRepo())
+        ..add(AppointmentsFetched(patientId: patientId)),
+      child: const AppointmentList(),
+    );
   }
 }

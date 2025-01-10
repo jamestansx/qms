@@ -72,6 +72,7 @@ class _AddAppointmentPageState extends State<AddAppointmentPage> {
                   itemBuilder: patientPopupItem,
                 ),
               ),
+              const SizedBox(height: 5),
               GestureDetector(
                 child: TextFormField(
                   controller: dateOfBirthController,
@@ -106,7 +107,7 @@ class _AddAppointmentPageState extends State<AddAppointmentPage> {
                     }
                   },
                   decoration: InputDecoration(
-                    hintText: "Date of birth",
+                    hintText: "Appointment Date",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none,

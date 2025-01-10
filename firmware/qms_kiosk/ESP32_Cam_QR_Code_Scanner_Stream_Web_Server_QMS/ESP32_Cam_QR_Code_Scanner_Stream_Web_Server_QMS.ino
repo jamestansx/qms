@@ -135,6 +135,8 @@
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 #define MIN(x, y) ((x < y) ? x : y)
 
+#define VERIFY_URL "http://192.168.247.181:8000/api/v1/queues/verify"
+
 // creating a task handle
 TaskHandle_t QRCodeReader_Task; 
 
@@ -175,10 +177,23 @@ const char *scannedUUID = ""; // Store UUID after QR code is read
 
 /* ======================================== Replace with your network credentials */
 
-//const char* ssid = "DT105_2.4GHz@unifi";
-//const char* password = "112233DT";
-const char* ssid = "Michael NG";
-const char* password = "weihan123456";
+#define WEILE
+#ifdef JAMESTANSX
+  #define SSIDNAME "jamestansx"
+  #define PASSWORD "james123456"
+#elif defined(WEIHAN)
+  #define SSIDNAME "Michael NG"
+  #define PASSWORD "weihan123456"
+#elif defined(UTEM)
+  #define SSIDNAME "UTeM-Net"
+  #define PASSWORD "1UTeM@PPPK"
+#elif defined(WEILE)
+  #define SSIDNAME "ijbol "
+  #define PASSWORD "09060511"
+#else
+  #define SSIDNAME "DT105_2.4GHz@unifi"
+  #define PASSWORD "112233DT"
+#endif
 /* ======================================== */
 
 /* ======================================== */
@@ -660,7 +675,7 @@ void perform_post_request(const char *uuid){
   Serial.println(json_str);
 
   esp_http_client_config_t config = {
-    .url = "http://172.20.10.5:8000/api/v1/queues/verify", //Full URL
+    .url = VERIFY_URL, //Full URL
     .event_handler = _http_ev_handler,
   };
 
@@ -702,7 +717,6 @@ void perform_post_request(const char *uuid){
 /* ________________________________________________________________________________ VOID SETUP() */
 void setup() {
   // put your setup code here, to run once:
-  
   Wire.begin(I2C_SDA, I2C_SCL, 1);
 
   // Disable brownout detector.
@@ -713,6 +727,30 @@ void setup() {
   Serial.setDebugOutput(true);
   Serial.println();
   /* ---------------------------------------- */
+
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  // WiFi.scanNetworks will return the number of networks found
+  int n = WiFi.scanNetworks();
+  Serial.println("scan done");
+  if (n == 0) {
+      Serial.println("no networks found");
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      // Print SSID and RSSI for each network found
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(")");
+      Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+      delay(10);
+    }
+  }
+  Serial.println("");
 
   pinMode(LED_OnBoard, OUTPUT);
   pinMode(LED_Green, OUTPUT);
@@ -767,8 +805,8 @@ void setup() {
   WiFi.mode(WIFI_STA);
   Serial.println("------------");
   Serial.print("Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
+  Serial.println(SSIDNAME);
+  WiFi.begin(SSIDNAME, PASSWORD);
   /* ::::::::::::::::: The process of connecting ESP32 CAM with WiFi Hotspot / WiFi Router. */
   /*
    * The process timeout of connecting ESP32 CAM with WiFi Hotspot / WiFi Router is 20 seconds.

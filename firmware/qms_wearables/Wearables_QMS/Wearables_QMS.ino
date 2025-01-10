@@ -11,22 +11,30 @@
 
 #define SIZEOF(a) (sizeof(a) / sizeof(*a))
 
-#define DEVICE_UUID "0ea57b2b-8dbe-41cd-9780-f7d1d237839c"
+#define DEVICE_UUID "da3db7d9-e7f7-4411-a1d4-747569a76711"
 
-//In the DT house
-//const char* ssid = "DT105_2.4GHz@unifi";
-//const char* password = "112233DT";
-//const char* mqtt_server = "192.168.0.7";
-
-//UTeM
-//const char* ssid = "UTeM-Net";
-//const char* password = "1UTeM@PPPK";
-//const char* mqtt_server = "10.131.129.57";
-
-//Ng
-const char* ssid = "Michael NG";
-const char* password = "weihan123456";
-const char* mqtt_server = "172.20.10.3";
+#define WEILE
+#ifdef JAMESTANSX
+  #define SSID "jamestansx"
+  #define PASSWORD "james123456"
+  #define MQTT_SERVER "192.168.125.181"
+#elif defined(WEIHAN)
+  #define SSID "Michael NG"
+  #define PASSWORD "weihan123456"
+  #define MQTT_SERVER "172.20.10.3"
+#elif defined(UTEM)
+  #define SSID "UTeM-Net"
+  #define PASSWORD "1UTeM@PPPK"
+  #define MQTT_SERVER "10.131.133.70"
+#elif defined(WEILE)
+  #define SSID "ijbol "
+  #define PASSWORD "09060511"
+  #define MQTT_SERVER "192.168.247.181"
+#else
+  #define SSID "DT105_2.4GHz@unifi"
+  #define PASSWORD "112233DT"
+  #define MQTT_SERVER "192.168.0.2"
+#endif
 
 const int mqtt_port = 1883;
 const char* mqtt_topic_location= "location/RSSI";
@@ -150,7 +158,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 };
 
 void connectWifi(){
-  WiFi.begin(ssid, password);
+  WiFi.begin(SSID, PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
   }
@@ -173,7 +181,7 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message: ");
   Serial.println(messageTemp);
 
-  if (strncmp(DEVICE_UUID, messageTemp) == 0) {
+  if (strncmp(DEVICE_UUID, messageTemp.c_str(), length) == 0) {
     digitalWrite(vibrationdc, HIGH);
     motorActive = true;
     motorStartTime = millis();
@@ -361,7 +369,7 @@ void setup() {
   connectWifi();
 
   mqttClient.setCallback(onMqttMessage);
-  mqttClient.setServer(mqtt_server, mqtt_port);
+  mqttClient.setServer(MQTT_SERVER, mqtt_port);
 
   pinMode(vibrationdc, OUTPUT);
   digitalWrite(vibrationdc, LOW);

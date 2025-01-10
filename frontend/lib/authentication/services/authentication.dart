@@ -50,10 +50,10 @@ class AuthRepo extends DioClient {
         "/patients/register",
         data: {
           "username": username,
-          "firstName": firstName,
-          "lastName": lastName,
+          "first_name": firstName,
+          "last_name": lastName,
           "password": password,
-          "dateOfBirth": DateFormat("yyyy-MM-dd").format(dateOfBirth),
+          "date_of_birth": DateFormat("yyyy-MM-dd").format(dateOfBirth),
         },
       );
 

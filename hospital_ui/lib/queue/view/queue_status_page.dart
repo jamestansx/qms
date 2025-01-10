@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fetch_client/fetch_client.dart';
 import 'package:flutter/material.dart';
 import 'package:qms_staff/queue/services/queue.dart';
@@ -44,81 +46,62 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                // return Center(
-                //   child: Column(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: <Widget>[
-                //       const Text(
-                //         "Current Queue Number:",
-                //       ),
-                //       Text(
-                //         snapshot.hasData ? snapshot.data! : "???",
-                //         style: const TextStyle(
-                //             fontWeight: FontWeight.bold, fontSize: 250),
-                //       ),
-                //       SizedBox(
-                //         child: Expanded(
-                //           child: Align(
-                //             alignment: FractionalOffset.bottomCenter,
-                //             child: Row(
-                //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //               children: [
-                //                 Expanded(
-                //                     child: ElevatedButton(
-                //                         onPressed: () {},
-                //                         child: const Icon(Icons.add_alert))),
-                //                 Expanded(
-                //                     child: ElevatedButton(
-                //                         onPressed: () {},
-                //                         child:
-                //                             const Icon(Icons.navigate_next))),
-                //               ],
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // );
 
-                return Center(
-                  child: Card.outlined(
-                    borderOnForeground: true,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
+                final Map<String, dynamic> queueNo =
+                    jsonDecode(snapshot.data!.substring("data: ".length));
+                String? queueNumber;
+                if (queueNo.containsKey("queue_no")) {
+                  queueNumber = (queueNo["queue_no"] as int).toString();
+                }
+
+                return Material(
+                  child: Container(
+                    constraints: const BoxConstraints.expand(),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
                     ),
-                    margin: const EdgeInsets.all(10.0),
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Current Queue Number:"),
-                          Text(snapshot.data!),
-                          Expanded(
-                            child: Align(
-                              alignment: FractionalOffset.bottomCenter,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Current Queue Number:",
+                              style: TextStyle(
+                                fontSize: 25,
+                                letterSpacing: 5,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              queueNumber ?? "-",
+                              style: const TextStyle(
+                                fontSize: 100,
+                                fontWeight: FontWeight.w100,
+                              ),
+                            ),
+                            Center(
+                              child: OverflowBar(
+                                alignment: MainAxisAlignment.center,
                                 children: [
-                                  Expanded(
-                                      child: ElevatedButton(
-                                          onPressed: () async {
-                                            await QueueRepo().alertQueue();
-                                          },
-                                          child: const Icon(Icons.add_alert))),
-                                  Expanded(
-                                      child: ElevatedButton(
-                                          onPressed: () async {
-                                            await QueueRepo().nextQueue();
-                                          },
-                                          child:
-                                              const Icon(Icons.navigate_next))),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await QueueRepo().alertQueue();
+                                    },
+                                    child: const Icon(Icons.add_alert),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await QueueRepo().nextQueue();
+                                    },
+                                    child: const Icon(Icons.navigate_next),
+                                  ),
                                 ],
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

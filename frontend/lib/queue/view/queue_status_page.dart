@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/scheduler.dart' as sch;
 import 'package:flutter_client_sse/flutter_client_sse.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:qms/main.dart';
 import 'package:qms/queue/services/queue.dart';
 
 class QueueStatusPage extends StatefulWidget {
@@ -34,6 +36,16 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
     super.dispose();
   }
 
+  Future<void> showNotification(NotificationDetails details) async {
+    await flutterLocalNotificationsPlugin.show(
+      id++,
+      "Queue Status",
+      "It's your turn!",
+      details,
+      payload: "$queueNo",
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +62,20 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
           }
 
           if (queueNo != null && queueNo == int.parse(widget.queueNo)) {
-            SchedulerBinding.instance.addPostFrameCallback((_) {
+            final AndroidNotificationDetails details =
+                AndroidNotificationDetails(
+              "queue_channel_id",
+              "queue_channel_title",
+              channelDescription: "It's your turn!",
+              ticker: "ticker",
+              importance: Importance.max,
+              priority: Priority.max,
+              when: DateTime.now().millisecondsSinceEpoch,
+              usesChronometer: true,
+              enableVibration: true,
+            );
+            sch.SchedulerBinding.instance.addPostFrameCallback((_) {
+              showNotification(NotificationDetails(android: details));
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text("It's Your TURN, MF")));
             });

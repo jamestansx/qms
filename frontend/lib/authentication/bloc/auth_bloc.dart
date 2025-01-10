@@ -54,11 +54,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthState.unknown());
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
     final Patient user = await _authRepo.login(
       username: event.username,
       password: event.password,
     );
-    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
     await prefs.setString("user", jsonEncode(user.toJson()));
   }
 
@@ -67,6 +67,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthState.unknown());
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
     final Patient user = await _authRepo.register(
       username: event.username,
       password: event.password,
@@ -74,7 +75,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       lastName: event.lastName,
       dateOfBirth: event.dateOfBirth,
     );
-    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
     await prefs.setString("user", jsonEncode(user.toJson()));
   }
 

@@ -21,6 +21,7 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
     Emitter<AppointmentState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: AppointmentStatus.initial));
       final appointments = await _appointmentRepo.list(event.patientId);
       emit(
         state.copyWith(

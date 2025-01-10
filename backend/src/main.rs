@@ -32,7 +32,7 @@ async fn init_db(db_uri: &str) -> Result<SqlitePool, sqlx::Error> {
 }
 
 async fn init_mqtt_client() -> Result<(AsyncClient, EventLoop), rumqttc::ClientError> {
-    let mut mqtt_opts = MqttOptions::new("qms_server_mqtt", "172.20.10.3", 1883);
+    let mut mqtt_opts = MqttOptions::new("qms_server_mqtt", "0.0.0.0", 1883);
     mqtt_opts.set_keep_alive(Duration::from_secs(5));
     let (cl, event_loop) = AsyncClient::new(mqtt_opts, 10);
     cl.subscribe("heartRate/BPM", QoS::AtMostOnce).await?;
@@ -125,7 +125,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .layer(CorsLayer::permissive());
 
-    let listener = TcpListener::bind("172.20.10.5:8000").await?;
+    let listener = TcpListener::bind("0.0.0.0:8000").await?;
     tracing::debug!("listening on {}", listener.local_addr()?);
     let server = task::spawn(async { axum::serve(listener, app).await });
 

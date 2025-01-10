@@ -42,28 +42,39 @@ class AppointmentList extends StatelessWidget {
             if (state.appointments.isEmpty) {
               return Center(child: Text("Noice, zero appoinment!"));
             }
-            return ListView.builder(
-              itemCount: state.appointments.length,
-              itemBuilder: (context, idx) {
-                final appointment = state.appointments[idx];
-                return Material(
-                  child: ListTile(
-                    leading: Text(
-                      "${appointment.id}",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    title: Text(
-                      appointment.scheduledAtUtc.toLocal().toString(),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        AppointmentQrPage.route(appointment.uuid),
-                      );
-                    },
-                    dense: true,
-                  ),
-                );
+            return RefreshIndicator(
+              onRefresh: () async {
+                Future block = context.read<AppointmentBloc>().stream.first;
+                final int patientId =
+                    context.read<AuthBloc>().state.patient!.id;
+                context
+                    .read<AppointmentBloc>()
+                    .add(AppointmentsFetched(patientId: patientId));
+                await block;
               },
+              child: ListView.builder(
+                itemCount: state.appointments.length,
+                itemBuilder: (context, idx) {
+                  final appointment = state.appointments[idx];
+                  return Material(
+                    child: ListTile(
+                      leading: Text(
+                        "${appointment.id}",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      title: Text(
+                        appointment.scheduledAtUtc.toLocal().toString(),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          AppointmentQrPage.route(appointment.uuid),
+                        );
+                      },
+                      dense: true,
+                    ),
+                  );
+                },
+              ),
             );
         }
       },
