@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class AuthRepo extends DioClient {
   Future<Patient> login({
     required String username,
     required String password,
+    required SharedPreferencesAsync prefs,
   }) async {
     try {
       Response response = await dio.post(
@@ -25,6 +27,7 @@ class AuthRepo extends DioClient {
       );
 
       final Patient patient = Patient.fromJson(response.data);
+      await prefs.setString("user", jsonEncode(patient.toJson()));
       _controller.add(AuthStatus.authenticated);
       return patient;
     } catch (e, stackTrace) {

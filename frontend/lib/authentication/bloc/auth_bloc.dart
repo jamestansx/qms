@@ -55,11 +55,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthState.unknown());
     final SharedPreferencesAsync prefs = SharedPreferencesAsync();
-    final Patient user = await _authRepo.login(
+    final Patient _ = await _authRepo.login(
       username: event.username,
       password: event.password,
+      prefs: prefs,
     );
-    await prefs.setString("user", jsonEncode(user.toJson()));
   }
 
   Future<void> _onUserSignup(
