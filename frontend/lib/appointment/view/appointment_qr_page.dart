@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
+import 'package:qms/queue/bloc/queue_bloc.dart';
 import 'package:qms/queue/services/queue.dart';
 import 'package:qms/queue/view/queue_status_page.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -54,7 +56,15 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
                       ),
                       actions: [
                         TextButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            Future block = context.read<QueueBloc>().stream.first;
+                            context.read<QueueBloc>().add(
+                                  AddQueue(
+                                    queueNo: int.parse(snapshot.data!.data!),
+                                  ),
+                                );
+                            await block;
+                            if (!context.mounted) return;
                             Navigator.pop(context);
                           },
                           child: const Text("Ok"),
@@ -66,7 +76,7 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
               if (!context.mounted) return;
               Navigator.pushReplacement<void, void>(
                 context,
-                QueueStatusPage.route(snapshot.data!.data!),
+                QueueStatusPage.route(),
               );
             });
           }
@@ -74,7 +84,7 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                QrImageView(data: widget.uuid, size: 200.0),
+                QrImageView(data: widget.uuid, size: 200.0, backgroundColor: Colors.white,),
                 const SizedBox(height: 10.0),
                 const Text("Scan this QR code at the Kiosk"),
               ],

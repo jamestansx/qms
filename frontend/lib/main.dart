@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:catppuccin_flutter/catppuccin_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -8,7 +9,9 @@ import 'package:qms/authentication/bloc/auth_bloc.dart';
 import 'package:qms/authentication/services/authentication.dart';
 import 'package:qms/authentication/view/login_page.dart';
 import 'package:qms/home/view/homepage.dart';
+import 'package:qms/queue/bloc/queue_bloc.dart';
 import 'package:qms/queue/view/queue_status_page.dart';
+import 'package:qms/theme.dart';
 
 int id = 0;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -36,7 +39,8 @@ Future<void> main() async {
       await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
 
   if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-    selectedNotifPayload = notificationAppLaunchDetails!.notificationResponse?.payload;
+    selectedNotifPayload =
+        notificationAppLaunchDetails!.notificationResponse?.payload;
   }
 
   runApp(const QmsApp());
@@ -92,9 +96,17 @@ class _QmsAppState extends State<QmsApp> {
   Widget build(BuildContext context) {
     return RepositoryProvider.value(
       value: _authRepo,
-      child: BlocProvider(
-        lazy: false,
-        create: (_) => AuthBloc(authRepo: _authRepo)..add(StreamAuth()),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            lazy: false,
+            create: (_) => AuthBloc(authRepo: _authRepo)..add(StreamAuth()),
+          ),
+          BlocProvider(
+            lazy: false,
+            create: (_) => QueueBloc(),
+          ),
+        ],
         child: const AppView(),
       ),
     );
@@ -116,12 +128,14 @@ class _AppViewState extends State<AppView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       navigatorKey: _navigatorKey,
       title: "Queue Management System",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
-        useMaterial3: true,
-      ),
+      theme: MaterialTheme(Theme.of(context).textTheme).light().copyWith(
+            textTheme: Theme.of(context).textTheme.apply(
+                  fontSizeFactor: 1.1,
+                ),
+          ),
       builder: (context, child) {
         return BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
@@ -129,7 +143,7 @@ class _AppViewState extends State<AppView> {
               case AuthStatus.authenticated:
                 {
                   if (selectedNotifPayload != null) {
-                    QueueStatusPage.route(selectedNotifPayload!);
+                    QueueStatusPage.route();
                   }
                   _nav.pushAndRemoveUntil(HomePage.route(), (_) => false);
                 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:qms/appointment/bloc/appointment_bloc.dart';
 import 'package:qms/appointment/services/appointment.dart';
 import 'package:qms/appointment/view/appointment_qr_page.dart';
@@ -37,11 +38,16 @@ class AppointmentList extends StatelessWidget {
           case AppointmentStatus.initial:
             return const Center(child: CircularProgressIndicator());
           case AppointmentStatus.failure:
-            return Center(child: Text("Failed to fetch appointments"));
+            return Center(
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  child: Center(child: Text("Failed to fetch appointments")),
+                ),
+              ),
+            );
           case AppointmentStatus.success:
-            if (state.appointments.isEmpty) {
-              return Center(child: Text("Noice, zero appoinment!"));
-            }
             return RefreshIndicator(
               onRefresh: () async {
                 Future block = context.read<AppointmentBloc>().stream.first;
@@ -52,29 +58,49 @@ class AppointmentList extends StatelessWidget {
                     .add(AppointmentsFetched(patientId: patientId));
                 await block;
               },
-              child: ListView.builder(
-                itemCount: state.appointments.length,
-                itemBuilder: (context, idx) {
-                  final appointment = state.appointments[idx];
-                  return Material(
-                    child: ListTile(
-                      leading: Text(
-                        "${appointment.id}",
-                        style: Theme.of(context).textTheme.bodySmall,
+              child: state.appointments.isEmpty
+                  ? Center(
+                      child: SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: Center(child: Text("No appointments found")),
+                        ),
                       ),
-                      title: Text(
-                        appointment.scheduledAtUtc.toLocal().toString(),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          AppointmentQrPage.route(appointment.uuid),
+                    )
+                  : ListView.builder(
+                      itemCount: state.appointments.length,
+                      itemBuilder: (context, idx) {
+                        final appointment = state.appointments[idx];
+                        return Material(
+                          child: ListTile(
+                            leading: Text(
+                              "ID: ${appointment.id}",
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                wordSpacing: 0.5,
+                              ),
+                            ),
+                            title: Text("Scheduled at:"),
+                            subtitle: Text(
+                              DateFormat().format(
+                                appointment.scheduledAtUtc.toLocal(),
+                              ),
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                wordSpacing: 0.5,
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                AppointmentQrPage.route(appointment.uuid),
+                              );
+                            },
+                            dense: true,
+                          ),
                         );
                       },
-                      dense: true,
                     ),
-                  );
-                },
-              ),
             );
         }
       },

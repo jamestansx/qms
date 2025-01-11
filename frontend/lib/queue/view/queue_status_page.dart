@@ -2,18 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' as sch;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:qms/main.dart';
+import 'package:qms/queue/bloc/queue_bloc.dart';
 import 'package:qms/queue/services/queue.dart';
 
 class QueueStatusPage extends StatefulWidget {
-  const QueueStatusPage({super.key, required this.queueNo});
+  const QueueStatusPage({super.key});
 
-  final String queueNo;
-
-  static Route<void> route(String queueNo) {
-    return MaterialPageRoute(builder: (_) => QueueStatusPage(queueNo: queueNo));
+  static Route<void> route() {
+    return MaterialPageRoute(builder: (_) => QueueStatusPage());
   }
 
   @override
@@ -53,6 +53,8 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
       body: StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
+          final target = BlocProvider.of<QueueBloc>(context).state.queueNo;
+
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
@@ -61,7 +63,7 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
             queueNo = jsonDecode(snapshot.data!.data!)["queue_no"];
           }
 
-          if (queueNo != null && queueNo == int.parse(widget.queueNo)) {
+          if (queueNo != null && queueNo == target) {
             final AndroidNotificationDetails details =
                 AndroidNotificationDetails(
               "queue_channel_id",
@@ -74,31 +76,38 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
               usesChronometer: true,
               enableVibration: true,
             );
-            sch.SchedulerBinding.instance.addPostFrameCallback((_) {
-              showNotification(NotificationDetails(android: details));
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text("It's Your TURN, MF")));
-            });
-          }
-
-          if (queueNo == null) {
-            return Center(child: Text("NO QUEUE NOW"));
-          }
-
-          return Center(
-            child: Card.outlined(
-              borderOnForeground: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+            sch.SchedulerBinding.instance.addPostFrameCallback(
+              (_) => showNotification(
+                NotificationDetails(android: details),
               ),
-              margin: EdgeInsets.all(10.0),
+            );
+          }
+
+          return Material(
+            child: Container(
+              constraints: const BoxConstraints.expand(),
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Current Queue Number:"),
-                    Text(queueNo!.toString()),
-                  ],
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Current Queue Number:",
+                        style: TextStyle(
+                          fontSize: 25,
+                          // letterSpacing: 5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        queueNo?.toString() ?? "-",
+                        style: const TextStyle(
+                          fontSize: 100,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

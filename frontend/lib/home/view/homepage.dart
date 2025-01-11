@@ -4,6 +4,7 @@ import 'package:qms/appointment/bloc/appointment_bloc.dart';
 import 'package:qms/appointment/services/appointment.dart';
 import 'package:qms/appointment/view/appointment_list_page.dart';
 import 'package:qms/authentication/bloc/auth_bloc.dart';
+import 'package:qms/queue/view/queue_status_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -18,8 +19,7 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            "Welcome back, ${context.read<AuthBloc>().state.patient?.username}"),
+        title: Text("QMS"),
       ),
       drawer: Drawer(
         child: ListView(
@@ -31,10 +31,10 @@ class HomePage extends StatelessWidget {
               currentAccountPicture: CircleAvatar(child: Icon(Icons.person)),
             ),
             ListTile(
-              leading: Icon(Icons.calendar_view_month),
-              title: Text("Appointments"),
+              leading: Icon(Icons.queue),
+              title: Text("Queue Status"),
               onTap: () {
-                Navigator.push(context, AppointmentListPage.route());
+                Navigator.of(context).push(QueueStatusPage.route());
               },
             ),
             Divider(),
