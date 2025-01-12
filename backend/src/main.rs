@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Ok(recv) = rx.try_recv() {
                 if let Some(recv) = recv.map(|x| x.1).unwrap_or(None) {
                     println!("received queue status. Ready to publish {}", recv);
-                    cl.publish("queue/status", QoS::AtLeastOnce, false, recv)
+                    cl.publish("queue/status", QoS::AtMostOnce, false, recv)
                         .await
                         .ok();
                 }

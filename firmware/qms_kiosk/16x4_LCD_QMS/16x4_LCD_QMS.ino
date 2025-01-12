@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 // Pin configuration
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2, ct = 9; 
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2, ct = 9;
 LiquidCrystal mylcd(rs, en, d4, d5, d6, d7);
 
 void setup() {
@@ -21,7 +21,7 @@ void setup() {
 
   // Display welcome message
   Serial.println("START");
-    mylcd.setCursor(0, 0); // Column 0, Row 0
+  mylcd.setCursor(0, 0); // Column 0, Row 0
   mylcd.print("---QMS System---");
   mylcd.setCursor(0, 1); // Column 0, Row 0
   mylcd.print("Hello,welcome to");
@@ -42,9 +42,9 @@ void receiveEvent(int howMany) {
   }
 
   // Clear the LCD to remove any old text
-  mylcd.clear(); 
+  mylcd.clear();
 
-    // Display the message on the LCD line by line
+  // Display the message on the LCD line by line
   int start = 0; // Start index of the substring
   int line = 0;  // Current LCD line (0 to 3 for a 16x4 LCD)
   while (start < buf.length() && line < 4) {
@@ -53,11 +53,6 @@ void receiveEvent(int howMany) {
     start += 16; // Move to the next 16 characters
     line++; // Move to the next line
   }
-//  // Display the received data (e.g., QR code link)
-//  mylcd.setCursor(0, 0); // Start at the top-left
-//  mylcd.print(buf); // Print the new message
 }
 
-void loop() {
-  // Nothing here for now
-}
+void loop() {}

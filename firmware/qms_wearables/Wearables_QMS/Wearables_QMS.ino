@@ -1,42 +1,45 @@
-#define USE_ARDUINO_INTERRUPTS true    // Set up low-level interrupts for accurate BPM math.
 #include <BLEDevice.h>
 #include <WiFi.h>
-
 #include <PubSubClient.h>
-#include <PulseSensorPlayground.h>     // Includes the PulseSensorPlayground Library.
-
+#include <PulseSensorPlayground.h>
 #include <Wire.h>
-#include <MPU6050.h>                   // Ensure the MPU6050 library is compatible with ESP32.
+#include <MPU6050.h>
 #include <math.h>
+
+// Set up low-level interrupts for accurate BPM math.
+#define USE_ARDUINO_INTERRUPTS true
 
 #define SIZEOF(a) (sizeof(a) / sizeof(*a))
 
-#define DEVICE_UUID "da3db7d9-e7f7-4411-a1d4-747569a76711"
+// NOTE: update the device uuid if changed
+#define DEVICE_UUID "8e1ec0d3-3792-479a-be5d-4deadcb06f3f"
+#define SAMPLE_INTERVAL_MS 100
+#define SAMPLE_INTERVAL_HEART_MS 100
+#define MQTT_PORT 1883
 
-#define WEILE
+// NOTE: define the corresponding wifi
 #ifdef JAMESTANSX
-  #define SSID "jamestansx"
-  #define PASSWORD "james123456"
-  #define MQTT_SERVER "192.168.125.181"
+#define SSID "jamestansx"
+#define PASSWORD "james123456"
+#define MQTT_SERVER "192.168.125.181"
 #elif defined(WEIHAN)
-  #define SSID "Michael NG"
-  #define PASSWORD "weihan123456"
-  #define MQTT_SERVER "172.20.10.3"
+#define SSID "Michael NG"
+#define PASSWORD "weihan123456"
+#define MQTT_SERVER "172.20.10.3"
 #elif defined(UTEM)
-  #define SSID "UTeM-Net"
-  #define PASSWORD "1UTeM@PPPK"
-  #define MQTT_SERVER "10.131.133.70"
+#define SSID "UTeM-Net"
+#define PASSWORD "1UTeM@PPPK"
+#define MQTT_SERVER "10.131.133.70"
 #elif defined(WEILE)
-  #define SSID "ijbol "
-  #define PASSWORD "09060511"
-  #define MQTT_SERVER "192.168.247.181"
+#define SSID "ijbol "
+#define PASSWORD "09060511"
+#define MQTT_SERVER "192.168.247.181"
 #else
-  #define SSID "DT105_2.4GHz@unifi"
-  #define PASSWORD "112233DT"
-  #define MQTT_SERVER "192.168.0.2"
+#define SSID "DT105_2.4GHz@unifi"
+#define PASSWORD "112233DT"
+#define MQTT_SERVER "192.168.0.2"
 #endif
 
-const int mqtt_port = 1883;
 const char* mqtt_topic_location= "location/RSSI";
 const char* mqtt_topic_heart= "heartRate/BPM";                // Topic to publish heart rate data.
 const char* mqtt_topic_heartAlert = "heartRate/heartAlert";
@@ -47,35 +50,32 @@ const char* mqtt_sub_queue = "queue/status";                  //Topic for queue 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
-//Variables: BLE
-const BLEUUID known_beacons[] = {
-  BLEUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b"),
-  BLEUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914c")
-};
-static boolean doScan = false;
-static BLERemoteCharacteristic* pRemoteCharacteristic;
-static BLEAdvertisedDevice* myDevice;
-static BLEClient* pClient = nullptr;
-int previousRSSI = 0;
-BLEScan* pBLEScan;
-
+// BLE
 struct BleBeacon {
   BLEUUID uuid;
   int rssi;
 };
+
+const BLEUUID known_beacons[] = {
+  BLEUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b"),
+  BLEUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914c")
+};
+BLEScan* pBLEScan;
 BleBeacon bleBeacons[SIZEOF(known_beacons)] = {};
 
-//Variables: heartrate
-const int PulseWire =34;       // PulseSensor PURPLE WIRE connected to GPIO36 (ADC1_CH0).
+// Heart rate
+const int PulseWire = 34;       // PulseSensor PURPLE WIRE connected to GPIO36 (ADC1_CH0).
 const int LED = 2;      // Onboard LED on ESP32 (usually GPIO2).
-int Threshold = 550;            // Threshold value to detect beats.
-
+int Threshold = 685;            // Threshold value to detect beats.
 bool recordingStarted = false;       // Flag to track when measurement starts
 PulseSensorPlayground pulseSensor;  // Creates an instance of the PulseSensorPlayground object.
 
 
-//variables: falldown
 // MPU6050 Configuration
+enum FallState { safe, initial, suspect, triggered };
+FallState fstate = FallState::safe;
+
+
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 float ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0;
@@ -88,14 +88,10 @@ byte trigger2count = 0; // Stores the counts past since trigger 2 was set true
 byte trigger3count = 0; // Stores the counts past since trigger 3 was set true
 int angleChange = 0;
 
-//Time intervals for each operation
-unsigned long prev_time_acce, prev_time_scan;
-const int SAMPLE_INTERVAL = 100; // milliseconds
+// non-blocking delay
+unsigned long prev_time_acce, prev_time_heart;
 
-unsigned long prev_time_heart;
-const int SAMPLE_INTERVAL_HEART = 100; // milliseconds
-
-//Vibration DC motor
+// Vibration DC motor
 #define vibrationdc 23
 static bool motorActive = false;
 static unsigned long motorStartTime = 0;
@@ -103,16 +99,11 @@ const unsigned long motorVibrationDuration = 500;
 
 void connectToMQTT() {
   while (!mqttClient.connected()) {
-    Serial.print(F("Connecting to MQTT..."));
     if (mqttClient.connect("ESP32_Client")) {
-      Serial.println(F("connected"));
-      uint16_t packetIdSub = mqttClient.subscribe(mqtt_sub_queue, 2);
-      Serial.print("Subscribing at QUEUE, packetId: ");
-      Serial.println(packetIdSub);
-      delay(3000);
+      mqttClient.subscribe(mqtt_sub_queue);
     } else {
-      Serial.print(F("failed, rc="));
-      Serial.print(mqttClient.state());
+      Serial.print(F("Failed to connect to MQTT with status code: "));
+      Serial.println(mqttClient.state());
 
       delay(5000);
     }
@@ -144,9 +135,6 @@ String printAndSendRSSI() {
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
     BLEUUID service = advertisedDevice.getServiceUUID();
-    Serial.print(F("BLE Advertised Device found: "));
-    Serial.println(advertisedDevice.toString().c_str());
-    Serial.println(service.toString());
 
     for (int i = 0; i < SIZEOF(known_beacons); i++) {
       if (service.equals(known_beacons[i])) {
@@ -162,24 +150,16 @@ void connectWifi(){
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
   }
-  Serial.println("Connected to Wi-Fi");
-  //Serial.print("IP address: ");
-  //Serial.println(WiFi.localIP());
+  Serial.print("Connected to Wi-Fi. IP address: ");
+  Serial.println(WiFi.localIP());
 
 }
 
-//server/queue  onMqttMessage() is responsible for obtaining MQTT message from the subscribed topic
-//and controlling the (outside exp: LED). The string variable 'messageTemp' holds the MQTT message.
 void onMqttMessage(char* topic, byte* payload, unsigned int length) {
-  Serial.println("\n Publish received.");
-  Serial.print("Topic: ");
-  Serial.println(topic);
   String messageTemp;
   for (int i = 0; i < length; i++){
     messageTemp += (char)payload[i];
   }
-  Serial.print("Message: ");
-  Serial.println(messageTemp);
 
   if (strncmp(DEVICE_UUID, messageTemp.c_str(), length) == 0) {
     digitalWrite(vibrationdc, HIGH);
@@ -187,42 +167,19 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
     motorStartTime = millis();
   }
 
-  //Turn off motor after the set duration
-  if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
-    digitalWrite(vibrationdc, LOW);
-    motorActive = false;
-  }
 }
 
 void heartrate() {
-  static unsigned long startTime = 0;    // To track the start time of measurement
-  static unsigned long lastBeatTime = 0; // Tracks the last time data was sent
-  const unsigned long interval = 500;   // Delay interval in milliseconds (adjust as needed)
-  int myBPM = pulseSensor.getBeatsPerMinute();
-
   if (pulseSensor.sawStartOfBeat()) {
-    if (!recordingStarted){
-      if(startTime == 0){
-        startTime = millis();
-      }
-      if (millis() - startTime >= 4000) {
-        Serial.print(" | Heart Rate: N/A");
-        recordingStarted = true; // Enable recording after 7 secondsM
-        Serial.println("Recording started. Data will now be sent to the MQTT server.");
-      }
-    } else if (millis() - lastBeatTime >= interval) {
-      lastBeatTime = millis(); // Update the last beat time
-      Serial.print(" | Heart Rate: ");
-      Serial.println(myBPM);
-      String payload_heart = String("{\"uuid\": \"");
-      payload_heart.concat(DEVICE_UUID);
-      payload_heart.concat("\", \"data\": { \"BPM\": \"");
-      payload_heart.concat(String(myBPM));
-      payload_heart.concat("\"}}");
-      Serial.print("Publish data: ");
-      Serial.println(payload_heart);
-      mqttClient.publish(mqtt_topic_heart, payload_heart.c_str());
-    }
+    int myBPM = pulseSensor.getBeatsPerMinute();
+    Serial.print(" | Heart Rate: ");
+    Serial.println(myBPM);
+    String payload_heart = String("{\"uuid\": \"");
+    payload_heart.concat(DEVICE_UUID);
+    payload_heart.concat("\", \"data\": { \"BPM\": \"");
+    payload_heart.concat(String(myBPM));
+    payload_heart.concat("\"}}");
+    mqttClient.publish(mqtt_topic_heart, payload_heart.c_str());
   }
 }
 
@@ -239,10 +196,11 @@ void falldown() {
   gz = (GyZ + 136) / 131.07;
   // Calculating Amplitude Vector for 3-axis
   float raw_amplitude = pow(pow(ax, 2) + pow(ay, 2) + pow(az, 2), 0.5);
-  float amplitude = raw_amplitude * 10;  // Multiplied by 10 because values are between 0 to 1
+  float amplitude = raw_amplitude * 10;  // Multiplied by 10 because values are between 0 to 1 m/s^2 normal = 1g
 
   Serial.print(" | Amplitude: ");
   Serial.println(amplitude);
+
   // Publish acceleration magnitude to MQTT
   char payload_amplitude[50];
   snprintf(payload_amplitude, 50, "{\"Amplitude\": %.2f}", amplitude);
@@ -250,24 +208,22 @@ void falldown() {
 
   if (amplitude <= 2 && trigger2 == false) { // If AM breaks lower threshold (0.4g)
     trigger1 = true;
-    //Serial.println("TRIGGER 1 ACTIVATED");
   }
   if (trigger1 == true) {     // Detects initial potential fall
     trigger1count++;
     if (amplitude >= 12) { // If AM breaks upper threshold (3g)
       trigger2 = true;
-      //    Serial.println("TRIGGER 2 ACTIVATED");
-      trigger1 = false; trigger1count = 0;
+      trigger1 = false;
+      trigger1count = 0;
     }
   }
   if (trigger2 == true) {   // Detects high amplitude (impact)
     trigger2count++;
     angleChange = pow(pow(gx, 2) + pow(gy, 2) + pow(gz, 2), 0.5);
-    Serial.println(angleChange);
     if (angleChange >= 30 && angleChange <= 400) { // If orientation changes by between 80-100 degrees
-      trigger3 = true; trigger2 = false; trigger2count = 0;
-      //    Serial.println(angleChange);
-      //    Serial.println("TRIGGER 3 ACTIVATED");
+      trigger3 = true;
+      trigger2 = false;
+      trigger2count = 0;
     }
   }
   if (trigger3 == true) {   // Monitors orientation changes (e.g. lying on the ground)
@@ -275,33 +231,19 @@ void falldown() {
 
     if (trigger3count >= 10) {
       angleChange = pow(pow(gx, 2) + pow(gy, 2) + pow(gz, 2), 0.5);
-      //     Serial.println(angleChange);
       if ((angleChange >= 0) && (angleChange <= 10)) { // If orientation changes remain between 0-10 degrees
         fall = true; trigger3 = false; trigger3count = 0;
-        //       Serial.println(angleChange);
-      }
-
-      else { // User regained normal orientation
-        trigger3 = false; trigger3count = 0;
-        //       Serial.println("TRIGGER 3 DEACTIVATED");
+      } else { // User regained normal orientation
+        trigger3 = false;
+        trigger3count = 0;
       }
     }
   }
 
-  if (fall == true && !motorActive) { // In the event of a fall detection
+  if (fall == true) { // In the event of a fall detection
     memset(bleBeacons, 0, sizeof(bleBeacons));
-    pBLEScan->start(5, false);
-    Serial.println("Fall detected!");
-    // Additional logic for alerts (e.g., buzzer, SMS, LED)
-    // Publish fall detection event to MQTT
-    Serial.print("size: ");
-    Serial.println(SIZEOF(bleBeacons));
-    for (int i = 0; i < SIZEOF(bleBeacons); i++) {
-            Serial.print("uuid: ");
-            Serial.println(bleBeacons[i].uuid.toString());
-            Serial.print("rssi: ");
-            Serial.println(bleBeacons[i].rssi);
-    }
+    pBLEScan->start(3, false);
+
     String location = printAndSendRSSI();
     String fallAlert = String("{\"uuid\": \"");
     fallAlert.concat(DEVICE_UUID);
@@ -309,19 +251,17 @@ void falldown() {
     fallAlert.concat(location);
     fallAlert.concat("\"}}");
     mqttClient.publish(mqtt_topic_fallAlert, fallAlert.c_str());
-    Serial.println(fallAlert);
+
     fall = false;
-    memset(bleBeacons, 0, sizeof(bleBeacons));
-    pBLEScan->start(5, false);
   }
 
   if (trigger2count >= 6) { // Allow 0.5s for orientation change
-    trigger2 = false; trigger2count = 0;
-    //   Serial.println("TRIGGER 2 DEACTIVATED");
+    trigger2 = false;
+    trigger2count = 0;
   }
   if (trigger1count >= 6) { // Allow 0.5s for AM to break upper threshold
-    trigger1 = false; trigger1count = 0;
-    //    Serial.println("TRIGGER 1 DEACTIVATED");
+    trigger1 = false;
+    trigger1count = 0;
   }
 }
 
@@ -342,7 +282,6 @@ void mpu_read() {
 void setup() {
   Serial.begin(115200);
 
-  
   //configure for ble
   BLEDevice::init("");
 
@@ -352,12 +291,16 @@ void setup() {
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
   pBLEScan->start(5, false);
-  
-  //Configure for heartrate
+
+  // Configure for heartrate
+  // NOTE: ESP32 ADC resolution defaults to 12 bits.
+  // PulseSensor rquires 10 bits
+  analogReadResolution(10);
   pulseSensor.analogInput(PulseWire);
   pulseSensor.blinkOnPulse(LED);  // Blink the onboard LED with a heartbeat.
+  pulseSensor.setSerial(Serial);
   pulseSensor.setThreshold(Threshold);
-  pulseSensor.begin();
+  while (!pulseSensor.begin());
 
   //configure for falldown
   Wire.begin();
@@ -368,56 +311,36 @@ void setup() {
 
   connectWifi();
 
+  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
   mqttClient.setCallback(onMqttMessage);
-  mqttClient.setServer(MQTT_SERVER, mqtt_port);
 
   pinMode(vibrationdc, OUTPUT);
   digitalWrite(vibrationdc, LOW);
 }
 
 void loop() {
-
-  unsigned long currTime_scan = millis();
-  if (currTime_scan - prev_time_scan >= 5000){
-    prev_time_scan = currTime_scan;
-    
-}
-
   if (!mqttClient.connected()) {
     connectToMQTT();
   }
   mqttClient.loop();
 
-  // if (doConnect) {
-  //   if (connectToServer()) {
-  //     Serial.println(F("We are now connected to the BLE Server."));
-  //   } else {
-  //     Serial.println(F("Failed to connect to the server."));
-  //   }
-  //   doConnect = false;
-  // }
+  heartrate();
+  nb_delay(falldown, prev_time_acce, SAMPLE_INTERVAL_MS);
 
-  // if (connected) {
-  //   locationMessage = printAndSendRSSI();
-  // } else if (doScan) {
-  //   BLEDevice::getScan()->start(0);
-  // }
-
-  unsigned long currTime_acce = millis();
-  if (currTime_acce - prev_time_acce >= SAMPLE_INTERVAL){
-    prev_time_acce = currTime_acce;
-    falldown();
+  //Turn off motor after the set duration
+  if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
+    digitalWrite(vibrationdc, LOW);
+    motorActive = false;
   }
 
-  unsigned long currTime_heart = millis();
-  if (currTime_heart - prev_time_heart >= SAMPLE_INTERVAL_HEART){    //100ms
-    prev_time_heart = currTime_heart;
-    heartrate();
-  }
-
-  // NOTE: clear BLEScan buffer to release memory
+  // clear BLEScan buffer to release memory
   pBLEScan->clearResults();
+}
 
-  // TODO: do we need delay here?
-  // delay(200);
+void nb_delay(void (*func)(), unsigned long &prev_sampled_time, unsigned long sampling_interval) {
+  unsigned long curr_time = millis();
+  if (curr_time - prev_sampled_time >= sampling_interval) {
+    prev_sampled_time = curr_time;
+    func();
+  }
 }

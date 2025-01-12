@@ -135,7 +135,9 @@
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 #define MIN(x, y) ((x < y) ? x : y)
 
-#define VERIFY_URL "http://192.168.247.181:8000/api/v1/queues/verify"
+// NOTE: update the api url if changed
+#define APIURL "192.168.0.2"
+#define VERIFY_URL "http://" APIURL ":8000/api/v1/queues/verify"
 
 // creating a task handle
 TaskHandle_t QRCodeReader_Task; 
