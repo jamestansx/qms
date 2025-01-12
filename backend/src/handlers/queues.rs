@@ -84,7 +84,7 @@ fn update_queue(
             .read()
             .unwrap()
             .iter()
-            .filter(|x| x.1.is_some())
+            .filter(|x| x.1.is_none())
             .map(|x| *x.0)
             .collect::<Vec<_>>()
             .first()

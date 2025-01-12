@@ -10,43 +10,37 @@ import 'package:qms_staff/dashboard/model/stream_data.dart';
 import 'package:qms_staff/dashboard/model/wearable.dart';
 
 class WearablesRepo extends DioClient {
-  final _controller = StreamController<StreamData>.broadcast();
+  final _controller = StreamController<StreamData>.broadcast(sync: true);
 
   StreamController<StreamData> get controller => _controller;
-
-  Stream<StreamData> get stream async* {
-    yield* _controller.stream;
-  }
 
   void dispose() {
     _controller.close();
   }
 
-  Stream<StreamData> monitor() async* {
-    if (!_controller.hasListener) {
-      final FetchClient cl = FetchClient(mode: RequestMode.cors);
-      final res = await cl.send(
-        http.Request(
-          "GET",
-          Uri.http("${DioClient.apiUrl}:8000", "/api/v1/wearables/monitor"),
-        ),
-      );
+  Future<void> monitor() async {
+    final FetchClient cl = FetchClient(mode: RequestMode.cors);
+    final res = await cl.send(
+      http.Request(
+        "GET",
+        Uri.http("${DioClient.apiUrl}:8000", "/api/v1/wearables/monitor"),
+      ),
+    );
 
-      final stream = res.stream
-          .toStringStream()
-          .where((event) => event.isNotEmpty)
-          .map(
-            (event) => StreamData.fromJson(
-              jsonDecode(
-                event.substring("data: ".length),
-              ),
+    final stream = res.stream
+        .toStringStream()
+        .where(
+          (event) => event.isNotEmpty,
+        )
+        .map(
+          (event) => StreamData.fromJson(
+            jsonDecode(
+              event.substring("data: ".length),
             ),
-          );
+          ),
+        );
 
-      _controller.addStream(stream, cancelOnError: true);
-    }
-
-    yield* stream;
+    stream.listen((ev) => _controller.add(ev));
   }
 
   Future<List<Wearable>> fetchList() async {

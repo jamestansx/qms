@@ -8,6 +8,8 @@ import 'package:qms_staff/dashboard/view/dashboard_page.dart';
 import 'package:qms_staff/dashboard/view/wearables_list.dart';
 import 'package:qms_staff/queue/view/queue_status_page.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   runApp(const MaterialApp(home: QmsStaffApp()));
 }
@@ -18,6 +20,7 @@ class QmsStaffApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: "QMS Staff",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

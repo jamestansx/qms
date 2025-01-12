@@ -95,7 +95,6 @@ class _QueueStatusPageState extends State<QueueStatusPage> {
                         "Current Queue Number:",
                         style: TextStyle(
                           fontSize: 25,
-                          // letterSpacing: 5,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

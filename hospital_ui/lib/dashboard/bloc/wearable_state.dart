@@ -7,7 +7,8 @@ final class WearableState extends Equatable {
     this.status = WearableStatus.initial,
     this.wearables = const <Wearable>[],
     this.selectedIdx = 0,
-    this.isLoading,
+    this.isAlertDismissed,
+    this.alertDevice,
     this.streamData,
   });
 
@@ -15,21 +16,24 @@ final class WearableState extends Equatable {
   final List<Wearable> wearables;
   final int selectedIdx;
   final StreamData? streamData;
-  final bool? isLoading;
+  final bool? isAlertDismissed;
+  final String? alertDevice;
 
   WearableState copyWith({
     WearableStatus? status,
     List<Wearable>? wearables,
     int? selectedIdx,
     StreamData? streamData,
-    bool? isLoading,
+    bool? isAlertDismissed,
+    String? alertDevice,
   }) {
     return WearableState(
       status: status ?? this.status,
       wearables: wearables ?? this.wearables,
       selectedIdx: selectedIdx ?? this.selectedIdx,
       streamData: streamData ?? this.streamData,
-      isLoading: isLoading ?? this.isLoading,
+      isAlertDismissed: isAlertDismissed ?? this.isAlertDismissed,
+      alertDevice: alertDevice ?? this.alertDevice,
     );
   }
 
@@ -39,6 +43,6 @@ final class WearableState extends Equatable {
         wearables,
         streamData,
         selectedIdx,
-        isLoading,
+        isAlertDismissed,
       ];
 }

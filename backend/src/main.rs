@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    env,
     str::FromStr,
     sync::{Arc, RwLock},
     time::Duration,
@@ -63,7 +64,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         loop {
             if let Ok(recv) = rx.try_recv() {
                 if let Some(recv) = recv.map(|x| x.1).unwrap_or(None) {
-                    cl.publish("server/queue", QoS::AtLeastOnce, false, recv)
+                    println!("received queue status. Ready to publish {}", recv);
+                    cl.publish("queue/status", QoS::AtLeastOnce, false, recv)
                         .await
                         .ok();
                 }
@@ -74,7 +76,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 match notif {
                     Event::Incoming(packet) => {
                         /*
-                        # payload structure #
                         {
                             "uuid": "<generated-uuid>", // uuid of the wearables
                             "topic": "<topic of the publisher>",
@@ -86,12 +87,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             },
                         }
                         */
-                        // if let Publish { dup: publish, qos, retain, topic, pkid, payload } = packet {
-                        //     if let Some(payload) = std::str::from_utf8(&publish.payload).ok() {
-                        //         tx_subs.send(payload.into()).unwrap();
-                        //     }
-                        // }
-
                         if let rumqttc::Packet::Publish(publish) = packet {
                             if let Some(payload) = std::str::from_utf8(&publish.payload).ok() {
                                 let mut res: MqttPayload = serde_json::from_str(payload).unwrap();
@@ -125,7 +120,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .layer(CorsLayer::permissive());
 
-    let listener = TcpListener::bind("0.0.0.0:8000").await?;
+    let listener = TcpListener::bind(format!(
+        "{}:8000",
+        env::var("BASEURL").unwrap_or("0.0.0.0".into())
+    ))
+    .await?;
     tracing::debug!("listening on {}", listener.local_addr()?);
     let server = task::spawn(async { axum::serve(listener, app).await });
 
