@@ -11,4 +11,3 @@ pub struct BeaconModel {
 pub struct RegBeaconParams {
     pub location_name: String,
 }
-
