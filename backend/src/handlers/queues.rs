@@ -64,6 +64,7 @@ fn update_queue(
     uuid: uuid::Uuid,
     age: usize,
     scheduled_at_utc: NaiveDateTime,
+    wearables: Vec<WearableModel>,
 ) -> Option<usize> {
     let tx = state.queue.verifier.read().unwrap();
     let tx = tx.get(&uuid);
@@ -111,20 +112,26 @@ fn update_queue(
                 wearable_uuid,
             },
             QueuePriority {
+                current: state.queue.curr_queue.is_none()
+                    || state.queue.curr_queue == Some(queue_no),
                 queue_no,
                 age,
                 appointment_time_utc: scheduled_at_utc,
             },
         );
 
-        if tx.send(format!("{}", queue_no)).is_ok() {
-            if priority_queue.len() == 1
-                || priority_queue
-                    .peek()
-                    .and_then(|x| Some(x.1.queue_no))
-                    .unwrap()
-                    != queue_no
-            {
+        if tx
+            .send((
+                format!("{}", queue_no),
+                wearables
+                    .iter()
+                    .find(|x| wearable_uuid == Some(x.uuid))
+                    .map(|x| x.device_name.clone())
+                    .unwrap_or_default(),
+            ))
+            .is_ok()
+        {
+            if priority_queue.len() == 1 {
                 state
                     .queue
                     .status
@@ -178,23 +185,28 @@ pub async fn verify_queue(
 
     let queue_no = update_queue(
         state.clone(),
-        params.uuid,
+        res.uuid,
         patient.age(),
         res.scheduled_at_utc,
+        wearables,
     );
 
-    query!(
-        "UPDATE appointments SET is_attended = true WHERE appointment_id = ?",
-        res.appointment_id
-    )
-    .execute(&state.db)
-    .await?;
+    if queue_no.is_some() {
+        query!(
+            "UPDATE appointments SET is_attended = true WHERE appointment_id = ?",
+            res.appointment_id
+        )
+        .execute(&state.db)
+        .await?;
 
-    Ok(format!(
-        "Welcome {}! Queue no.: {}",
-        patient.username,
-        queue_no.unwrap()
-    ))
+        return Ok(format!(
+            "Welcome {}! Queue no.: {}",
+            patient.username,
+            queue_no.unwrap()
+        ));
+    }
+
+    Err("No verifier running".into())
 }
 
 pub async fn register_queue(
@@ -213,7 +225,7 @@ pub async fn register_queue(
         let queue_no = rx.recv().await;
 
         if let Ok(queue_no) = queue_no {
-            yield Event::default().data(queue_no);
+            yield Event::default().data(json!({"queue_no": queue_no.0, "wearables": queue_no.1 }).to_string());
             state.queue.verifier.write().unwrap().remove(&params.uuid);
         }
     }))

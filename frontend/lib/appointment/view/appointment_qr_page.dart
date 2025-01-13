@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,24 +45,47 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
         stream: stream,
         builder: (BuildContext context, AsyncSnapshot<SSEModel> snapshot) {
           if (snapshot.hasData) {
+            final data = jsonDecode(snapshot.data!.data!);
+
             SchedulerBinding.instance.addPostFrameCallback((_) async {
               await showDialog(
                   context: context,
                   barrierDismissible: false,
                   builder: (_) {
                     return AlertDialog(
-                      title: const Text("Your Queue Number"),
-                      content: Text(
-                        snapshot.data!.data!,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      title: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: "Your Queue Number: "),
+                            TextSpan(
+                              text: data["queue_no"],
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
+                      content: data["wearable"] == null
+                          ? null
+                          : Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(text: "Assigned Wearable Name: "),
+                                  TextSpan(
+                                    text: data["wearable"],
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
                       actions: [
                         TextButton(
                           onPressed: () async {
-                            Future block = context.read<QueueBloc>().stream.first;
+                            Future block =
+                                context.read<QueueBloc>().stream.first;
                             context.read<QueueBloc>().add(
                                   AddQueue(
-                                    queueNo: int.parse(snapshot.data!.data!),
+                                    queueNo: int.parse(data["queue_no"]),
                                   ),
                                 );
                             await block;
@@ -84,7 +109,11 @@ class _AppointmentQrPageState extends State<AppointmentQrPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                QrImageView(data: widget.uuid, size: 200.0, backgroundColor: Colors.white,),
+                QrImageView(
+                  data: widget.uuid,
+                  size: 200.0,
+                  backgroundColor: Colors.white,
+                ),
                 const SizedBox(height: 10.0),
                 const Text("Scan this QR code at the Kiosk"),
               ],

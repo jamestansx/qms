@@ -24,10 +24,11 @@ pub type SharedAppState = Arc<AppState>;
 
 pub type SharedQueue = Arc<RwLock<PriorityQueue<Queue, QueuePriority>>>;
 
-pub type SharedVerifier = Arc<RwLock<HashMap<uuid::Uuid, broadcast::Sender<String>>>>;
+pub type SharedVerifier = Arc<RwLock<HashMap<uuid::Uuid, broadcast::Sender<(String, String)>>>>;
 
 #[derive(Debug)]
 pub struct QueueState {
+    pub curr_queue: Option<usize>,
     pub next_queue_no: AtomicUsize,
     pub verifier: SharedVerifier,
     pub queue: SharedQueue,
@@ -35,7 +36,11 @@ pub struct QueueState {
 }
 
 impl AppState {
-    pub fn new(db: SharedDb, tx: broadcast::Sender<Option<(usize, Option<String>)>>, iot: IotState) -> AppState {
+    pub fn new(
+        db: SharedDb,
+        tx: broadcast::Sender<Option<(usize, Option<String>)>>,
+        iot: IotState,
+    ) -> AppState {
         AppState {
             db,
             queue: QueueState::new(tx),
@@ -47,6 +52,7 @@ impl AppState {
 impl QueueState {
     pub fn new(tx: broadcast::Sender<Option<(usize, Option<String>)>>) -> QueueState {
         QueueState {
+            curr_queue: None,
             next_queue_no: AtomicUsize::new(1),
             verifier: Arc::new(RwLock::new(HashMap::new())),
             queue: SharedQueue::new(RwLock::new(PriorityQueue::default())),

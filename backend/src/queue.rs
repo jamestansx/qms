@@ -2,21 +2,30 @@ use std::cmp::{self, Ordering};
 
 use chrono::{Duration, NaiveDateTime, Utc};
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy)]
 pub struct QueuePriority {
+    pub current: bool,
     pub queue_no: usize,
     pub age: usize,
     pub appointment_time_utc: NaiveDateTime,
 }
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub struct Queue {
     pub appointment_uuid: uuid::Uuid,
     pub wearable_uuid: Option<uuid::Uuid>,
 }
 
 impl Ord for QueuePriority {
+    /// The queue priority is calculated based on the following criteria:
+    /// 1. Age - elderly (age >= 65) has a greater priority
+    /// 2. Appointment Time - appointment within 1 hours will be prioritized
+    /// 3. Queue number
     fn cmp(&self, other: &Self) -> cmp::Ordering {
+        if self.current {
+            return Ordering::Greater;
+        }
+
         let elder = (self.age >= 65, other.age >= 65);
         if elder.0 && !elder.1 {
             return Ordering::Greater;

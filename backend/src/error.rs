@@ -22,10 +22,13 @@ impl IntoResponse for AppError {
                     database_error.message().into(),
                 ),
                 sqlx::Error::RowNotFound => (StatusCode::NOT_FOUND, "Not Found".into()),
-                _ => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Database went BRUHHHHH".into(),
-                ),
+                err => {
+                    tracing::error!("{err:?}");
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Database went BRUHHHHH".into(),
+                    )
+                }
             },
             AppError::CustomError(str) => (StatusCode::NOT_FOUND, str.into()),
         };
