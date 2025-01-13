@@ -29,5 +29,5 @@ $ BASEURL=<api-url> cargo run --release
 - firmware:
 ```sh
 $ # Only for arduino-cli
-$ ./build.sh
+$ ./build.sh <port-name>
 ```
