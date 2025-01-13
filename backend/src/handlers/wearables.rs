@@ -101,3 +101,8 @@ pub async fn wearbles_list(
         .await?;
     Ok(Json(model))
 }
+
+pub async fn ack_fall(State(state): State<SharedAppState>) -> Result<(), AppError> {
+    let _ = state.iot.tx_fall.send(());
+    Ok(())
+}

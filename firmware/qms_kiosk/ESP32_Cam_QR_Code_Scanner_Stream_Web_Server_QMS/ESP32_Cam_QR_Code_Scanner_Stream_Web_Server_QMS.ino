@@ -136,7 +136,7 @@
 #define MIN(x, y) ((x < y) ? x : y)
 
 // NOTE: update the api url if changed
-#define APIURL "192.168.0.2"
+#define APIURL "192.168.247.181"
 #define VERIFY_URL "http://" APIURL ":8000/api/v1/queues/verify"
 
 // creating a task handle

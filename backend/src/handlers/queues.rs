@@ -33,12 +33,12 @@ pub async fn queue_status(
         .read()
         .unwrap()
         .peek()
-        .and_then(|x| Some(x.1.queue_no));
+        .map(|x| x.1.queue_no);
     let mut rx = state.queue.status.subscribe();
 
     Sse::new(try_stream! {
         if let Some(num) = init_queue_no {
-            yield Event::default().data(format!("{}", json!({"queue_no": num}).to_string()));
+            yield Event::default().data(json!({"queue_no": num}).to_string());
         } else {
             yield Event::default().data(json!({}).to_string());
         }
@@ -49,7 +49,7 @@ pub async fn queue_status(
                 if recv.is_none() {
                     yield Event::default().data(json!({}).to_string());
                 } else if let Some(recv) = recv {
-                    yield Event::default().data(format!("{}", json!({"queue_no": recv.0}).to_string()));
+                    yield Event::default().data(json!({"queue_no": recv.0}).to_string());
                 }
             } else {
                 error!("Something's wrong with receiver");
@@ -90,7 +90,7 @@ fn update_queue(
             .collect::<Vec<_>>()
             .first()
             .copied()
-            .map_or(None, |x| {
+            .and_then(|x| {
                 if age > 65 {
                     return Some(x);
                 }

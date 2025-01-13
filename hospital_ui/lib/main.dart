@@ -11,7 +11,12 @@ import 'package:qms_staff/queue/view/queue_status_page.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
-  runApp(const MaterialApp(home: QmsStaffApp()));
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: QmsStaffApp(),
+    ),
+  );
 }
 
 class QmsStaffApp extends StatelessWidget {

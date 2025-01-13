@@ -11,6 +11,7 @@ fn route() -> Router<SharedAppState> {
         .route("/register", post(register_wearable))
         .route("/:id", get(get_wearable_by_uuid))
         .route("/list", get(wearbles_list))
+        .route("/fallack", get(ack_fall))
 }
 
 pub fn routes() -> Router<SharedAppState> {

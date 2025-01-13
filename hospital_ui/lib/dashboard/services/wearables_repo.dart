@@ -57,4 +57,13 @@ class WearablesRepo extends DioClient {
       rethrow;
     }
   }
+
+
+  Future<void> ackFall() async {
+    try {
+      await dio.get("/wearables/fallack");
+    } catch (_) {
+      rethrow;
+    }
+  }
 }

@@ -34,7 +34,7 @@ class _AddAppointmentPageState extends State<AddAppointmentPage> {
       child: ListTile(
         selected: isSelected,
         title: Text("${item.firstName} ${item.lastName}"),
-        leading: CircleAvatar(child: Text(item.firstName[0])),
+        leading: CircleAvatar(child: Text(item.firstName.isNotEmpty ? item.firstName[0] : "")),
       ),
     );
   }

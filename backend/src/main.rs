@@ -11,7 +11,7 @@ use axum::{
     Router,
 };
 use routes::make_routes;
-use rumqttc::{mqttbytes::QoS, AsyncClient, Event, EventLoop, MqttOptions};
+use rumqttc::{mqttbytes::QoS, AsyncClient, Event, EventLoop, MqttOptions, Packet::Publish};
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use states::*;
 use tokio::{net::TcpListener, sync::broadcast, task};
@@ -50,52 +50,65 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let pool = init_db("sqlite://qms.db").await?;
 
-    let (tx, mut rx) = broadcast::channel(100);
+    let (tx, _) = broadcast::channel(100);
     let (tx_subs, _) = broadcast::channel::<MqttPayload>(100);
+    let (tx_fall, _) = broadcast::channel::<()>(100);
     let iot = IotState {
         tx_subscribe: tx_subs.clone(),
         wearables: Arc::new(RwLock::new(HashMap::new())),
+        tx_fall: tx_fall.clone(),
     };
-    let state = Arc::new(AppState::new(pool, tx, iot));
+    let state = Arc::new(AppState::new(pool, tx.clone(), iot));
 
     // mqtt client
     let (cl, mut event_loop) = init_mqtt_client().await?;
     let mqtt_client = task::spawn(async move {
+        let mut rx = tx.subscribe();
+        let mut rx_fall = tx_fall.subscribe();
         loop {
             if let Ok(recv) = rx.try_recv() {
-                if let Some(recv) = recv.map(|x| x.1).unwrap_or(None) {
-                    println!("received queue status. Ready to publish {}", recv);
-                    cl.publish("queue/status", QoS::AtMostOnce, false, recv)
+                if let Some(recv) = recv.map(|x| x.1) {
+                    tracing::warn!("receive {recv:?}");
+                    cl.publish(
+                        "queue/status",
+                        QoS::AtMostOnce,
+                        false,
+                        recv.unwrap_or("NONE".into()),
+                    )
+                    .await
+                    .ok();
+                } else {
+                    tracing::warn!("receive NONE");
+                    cl.publish("queue/status", QoS::AtMostOnce, false, "NONE")
                         .await
                         .ok();
                 }
             }
 
+            if rx_fall.try_recv().is_ok() {
+                cl.publish("accelerometer/ack", QoS::AtMostOnce, false, "")
+                    .await
+                    .ok();
+            }
+
+            /*
+            {
+                "uuid": "<generated-uuid>", // uuid of the wearables
+                "topic": "<topic of the publisher>",
+                "data": {
+                    // any data published
+                    "bpm": 123,
+                    "fell_down": true,
+                    "location": "<location-uuid>",
+                },
+            }
+            */
             let notif = event_loop.poll().await;
-            if let Ok(notif) = notif {
-                match notif {
-                    Event::Incoming(packet) => {
-                        /*
-                        {
-                            "uuid": "<generated-uuid>", // uuid of the wearables
-                            "topic": "<topic of the publisher>",
-                            "data": {
-                                // any data published
-                                "bpm": 123,
-                                "fell_down": true,
-                                "location": "<location-uuid>",
-                            },
-                        }
-                        */
-                        if let rumqttc::Packet::Publish(publish) = packet {
-                            if let Some(payload) = std::str::from_utf8(&publish.payload).ok() {
-                                let mut res: MqttPayload = serde_json::from_str(payload).unwrap();
-                                res.topic = publish.topic;
-                                let _ = tx_subs.send(res);
-                            }
-                        }
-                    }
-                    _ => {}
+            if let Ok(Event::Incoming(Publish(publish))) = notif {
+                if let Ok(payload) = std::str::from_utf8(&publish.payload) {
+                    let mut res: MqttPayload = serde_json::from_str(payload).unwrap();
+                    res.topic = publish.topic;
+                    let _ = tx_subs.send(res);
                 }
             }
         }

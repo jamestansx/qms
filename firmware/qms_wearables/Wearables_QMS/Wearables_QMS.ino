@@ -18,6 +18,7 @@
 #define MQTT_PORT 1883
 
 // NOTE: define the corresponding wifi
+#define WEILE
 #ifdef JAMESTANSX
 #define SSID "jamestansx"
 #define PASSWORD "james123456"
@@ -95,7 +96,7 @@ unsigned long prev_time_acce, prev_time_heart;
 #define vibrationdc 23
 static bool motorActive = false;
 static unsigned long motorStartTime = 0;
-const unsigned long motorVibrationDuration = 500;
+const unsigned long motorVibrationDuration = 5000;
 
 void connectToMQTT() {
   while (!mqttClient.connected()) {
@@ -160,8 +161,11 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++){
     messageTemp += (char)payload[i];
   }
+  Serial.print("MQTT: ");
+  Serial.println(messageTemp);
 
   if (strncmp(DEVICE_UUID, messageTemp.c_str(), length) == 0) {
+    Serial.println("COMPARE TRUE");
     digitalWrite(vibrationdc, HIGH);
     motorActive = true;
     motorStartTime = millis();

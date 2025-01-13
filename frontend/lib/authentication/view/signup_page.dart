@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:qms/authentication/bloc/auth_bloc.dart';
 import 'package:qms/authentication/view/login_page.dart';
+import 'package:qms/core/view/option_page.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
@@ -214,6 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(color: Colors.deepPurple),
                 ),
               ),
+              OptionPage.widget(context),
             ],
           ),
         ],

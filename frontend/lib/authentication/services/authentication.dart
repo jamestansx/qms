@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qms/core/dio_client.dart';
+import 'package:qms/main.dart';
 import 'package:qms/patient/model/patient.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,7 @@ class AuthRepo extends DioClient {
     required SharedPreferencesAsync prefs,
   }) async {
     try {
+      print(baseUrl);
       Response response = await dio.post(
         "/patients/login",
         data: {"username": username, "password": password},

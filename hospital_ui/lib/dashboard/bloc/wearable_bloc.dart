@@ -37,6 +37,7 @@ class WearableBloc extends Bloc<WearableEvent, WearableState> {
           title: 'Fall Alert',
           text: 'Fall location: ${ev.data}',
         );
+        await _wearableRepo.ackFall();
       }
       emit(state.copyWith(streamData: ev, isAlertDismissed: false));
     });
@@ -44,7 +45,6 @@ class WearableBloc extends Bloc<WearableEvent, WearableState> {
     return emit.onEach(
       _wearableRepo.controller.stream,
       onData: (status) async {
-        print(status);
         return emit(
             state.copyWith(streamData: status, isAlertDismissed: false));
       },

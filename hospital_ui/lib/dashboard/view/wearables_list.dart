@@ -39,7 +39,7 @@ class _WearablesListState extends State<WearablesList> {
               alertDevice.remove(state.alertDevice!);
             }
             return SizedBox(
-              width: 200,
+                width: MediaQuery.of(context).size.width * 0.25,
               child: Column(
                 children: [
                   const Text(

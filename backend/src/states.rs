@@ -64,6 +64,7 @@ impl QueueState {
 pub struct IotState {
     pub tx_subscribe: broadcast::Sender<MqttPayload>,
     pub wearables: Arc<RwLock<HashMap<uuid::Uuid, Option<usize>>>>,
+    pub tx_fall: broadcast::Sender<()>,
 }
 
 //  {

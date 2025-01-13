@@ -11,6 +11,7 @@ import 'package:qms/home/view/homepage.dart';
 import 'package:qms/queue/bloc/queue_bloc.dart';
 import 'package:qms/queue/view/queue_status_page.dart';
 import 'package:qms/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 int id = 0;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -18,6 +19,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 final StreamController<NotificationResponse> selectNotificationStream =
     StreamController<NotificationResponse>.broadcast();
 String? selectedNotifPayload;
+late String baseUrl;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,11 @@ Future<void> main() async {
     selectedNotifPayload =
         notificationAppLaunchDetails!.notificationResponse?.payload;
   }
+
+  final prefs = SharedPreferencesAsync();
+  final url = await prefs.getString("BASEURL");
+  final base = url ?? "0.0.0.0";
+  baseUrl = "http://$base:8000/api/v1";
 
   runApp(const QmsApp());
 }
@@ -66,7 +73,7 @@ class _QmsAppState extends State<QmsApp> {
 
   Future<void> _isAndroidPermissionGranted() async {
     if (Platform.isAndroid) {
-      final bool granted = await flutterLocalNotificationsPlugin
+      final bool _ = await flutterLocalNotificationsPlugin
               .resolvePlatformSpecificImplementation<
                   AndroidFlutterLocalNotificationsPlugin>()
               ?.areNotificationsEnabled() ??
@@ -79,7 +86,7 @@ class _QmsAppState extends State<QmsApp> {
       final AndroidFlutterLocalNotificationsPlugin? androidImpl =
           flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
-      final bool? grantedNotifPermission =
+      final bool? _ =
           await androidImpl?.requestNotificationsPermission();
     }
   }
