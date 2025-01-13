@@ -1,8 +1,8 @@
 # Queue Management System
 
 ## TODO
-- [] update queue to wearables to vibrate
-- [] fix bug where queue is not updating its priority
+- [x] update queue to wearables to vibrate
+- [x] fix bug where queue is not updating its priority
 
 ## SETUP
 
