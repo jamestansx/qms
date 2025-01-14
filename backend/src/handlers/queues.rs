@@ -66,8 +66,10 @@ fn update_queue(
     scheduled_at_utc: NaiveDateTime,
     wearables: Vec<WearableModel>,
 ) -> Option<usize> {
+    tracing::info!("update queue");
     let tx = state.queue.verifier.read().unwrap();
     let tx = tx.get(&uuid);
+    dbg!(&tx);
 
     if let Some(tx) = tx {
         let mut priority_queue = state.queue.queue.write().unwrap();
@@ -106,19 +108,21 @@ fn update_queue(
                 .insert(uuid, Some(queue_no));
         }
 
+        let mut read = state.queue.curr_queue.write().unwrap();
         priority_queue.push(
             Queue {
                 appointment_uuid: uuid,
                 wearable_uuid,
             },
             QueuePriority {
-                current: state.queue.curr_queue.is_none()
-                    || state.queue.curr_queue == Some(queue_no),
+                current: read.is_none()
+                    || *read == Some(queue_no),
                 queue_no,
                 age,
                 appointment_time_utc: scheduled_at_utc,
             },
         );
+        tracing::info!("run queue push");
 
         if tx
             .send((
@@ -137,6 +141,7 @@ fn update_queue(
                     .status
                     .send(Some((queue_no, wearable_uuid.map(|x| x.to_string()))))
                     .unwrap();
+                *read = Some(queue_no);
             }
             state.queue.next_queue_no.fetch_add(1, Ordering::Relaxed);
             return Some(queue_no);
@@ -152,6 +157,7 @@ pub async fn verify_queue(
     State(state): State<SharedAppState>,
     Json(params): Json<RegQueueParams>,
 ) -> Result<String, AppError> {
+    tracing::info!("Receive verify uuid: {}", params.uuid);
     let res = query!(
         "SELECT appointment_id, patient_id, scheduled_at_utc, uuid as 'uuid: uuid::Uuid'
         FROM appointments
@@ -161,6 +167,7 @@ pub async fn verify_queue(
     .fetch_one(&state.db)
     .await?;
 
+
     let patient: PatientModel = query_as(
         "SELECT * FROM patients
         WHERE patient_id = ?",
@@ -168,6 +175,7 @@ pub async fn verify_queue(
     .bind(res.patient_id)
     .fetch_one(&state.db)
     .await?;
+    tracing::info!("verify patient: {}", patient.username);
 
     let wearables: Vec<WearableModel> = query_as("SELECT * FROM wearables")
         .fetch_all(&state.db)
@@ -176,6 +184,7 @@ pub async fn verify_queue(
     if wearables.is_empty() {
         return Err("No wearables found!".into());
     }
+    dbg!(&wearables);
 
     wearables.iter().for_each(|x| {
         if !state.iot.wearables.read().unwrap().contains_key(&x.uuid) {
@@ -191,6 +200,7 @@ pub async fn verify_queue(
         wearables,
     );
 
+    dbg!(&queue_no);
     if queue_no.is_some() {
         query!(
             "UPDATE appointments SET is_attended = true WHERE appointment_id = ?",
@@ -245,6 +255,7 @@ pub async fn next_queue(State(state): State<SharedAppState>) {
 
     let priority_queue = state.queue.queue.read().unwrap();
     let q = priority_queue.peek();
+    let mut curr_queue = state.queue.curr_queue.write().unwrap();
     if let Some(q) = q {
         let hash_map = state.iot.wearables.read().unwrap();
         let wearable = hash_map.get(&q.0.appointment_uuid);
@@ -259,8 +270,10 @@ pub async fn next_queue(State(state): State<SharedAppState>) {
             .status
             .send(Some((q.1.queue_no, wearable.map(|x| x.to_string()))))
             .unwrap();
+        *curr_queue = Some(q.1.queue_no);
     } else {
         state.queue.status.send(None).unwrap();
+        *curr_queue = None;
     }
 }
 

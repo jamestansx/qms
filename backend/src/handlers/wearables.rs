@@ -25,7 +25,7 @@ pub async fn monitor_status(
 
                 if device_name.is_err() {
                     error!("ARGHHHH");
-                    continue;
+                    break;
                 }
 
                 match recv.topic.as_str() {
@@ -43,7 +43,7 @@ pub async fn monitor_status(
 
                             if location_name.is_err() {
                                 error!("FUCKKKK");
-                                continue;
+                                break;
                             }
 
                             yield Event::default().data(serde_json::to_string(&WearableStatRes {

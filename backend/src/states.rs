@@ -28,7 +28,7 @@ pub type SharedVerifier = Arc<RwLock<HashMap<uuid::Uuid, broadcast::Sender<(Stri
 
 #[derive(Debug)]
 pub struct QueueState {
-    pub curr_queue: Option<usize>,
+    pub curr_queue: Arc<RwLock<Option<usize>>>,
     pub next_queue_no: AtomicUsize,
     pub verifier: SharedVerifier,
     pub queue: SharedQueue,
@@ -52,7 +52,7 @@ impl AppState {
 impl QueueState {
     pub fn new(tx: broadcast::Sender<Option<(usize, Option<String>)>>) -> QueueState {
         QueueState {
-            curr_queue: None,
+            curr_queue: Arc::new(RwLock::new(None)),
             next_queue_no: AtomicUsize::new(1),
             verifier: Arc::new(RwLock::new(HashMap::new())),
             queue: SharedQueue::new(RwLock::new(PriorityQueue::default())),
