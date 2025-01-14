@@ -225,7 +225,11 @@ pub async fn register_queue(
         let queue_no = rx.recv().await;
 
         if let Ok(queue_no) = queue_no {
-            yield Event::default().data(json!({"queue_no": queue_no.0, "wearables": queue_no.1 }).to_string());
+            if queue_no.1.is_empty() {
+                yield Event::default().data(json!({"queue_no": queue_no.0 }).to_string());
+            } else {
+                yield Event::default().data(json!({"queue_no": queue_no.0, "wearable": queue_no.1 }).to_string());
+            }
             state.queue.verifier.write().unwrap().remove(&params.uuid);
         }
     }))
