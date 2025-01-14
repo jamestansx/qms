@@ -12,7 +12,7 @@
 #define SIZEOF(a) (sizeof(a) / sizeof(*a))
 
 // NOTE: update the device uuid if changed
-#define DEVICE_UUID "8e1ec0d3-3792-479a-be5d-4deadcb06f3f"
+#define DEVICE_UUID "c0fedfc2-4ad1-40dd-a070-7209e8ea0496"
 #define SAMPLE_INTERVAL_MS 100
 #define SAMPLE_INTERVAL_HEART_MS 100
 #define MQTT_PORT 1883
