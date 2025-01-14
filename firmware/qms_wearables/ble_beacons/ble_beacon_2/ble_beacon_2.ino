@@ -38,7 +38,7 @@ void setup() {
   Serial.begin(115200);
 
   // Create the BLE Device
-  BLEDevice::init("ESP32_Server_2");
+  BLEDevice::init("Patient_Room_BLE");
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();

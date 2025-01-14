@@ -48,6 +48,8 @@ const char* mqtt_topic_amplitude = "accelerometer/amplitude";
 const char* mqtt_topic_angular = "accelerometer/ang";
 const char* mqtt_topic_fallAlert = "accelerometer/fall";      // Topic for fall detection.
 const char* mqtt_sub_queue = "queue/status";                  //Topic for queue status update
+const char* mqtt_sub_ack = "accelerometer/ack";
+
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
@@ -98,10 +100,15 @@ static bool motorActive = false;
 static unsigned long motorStartTime = 0;
 const unsigned long motorVibrationDuration = 5000;
 
+// Buzzer
+#define BUZZER_PIN 25
+
 void connectToMQTT() {
   while (!mqttClient.connected()) {
     if (mqttClient.connect("ESP32_Client")) {
       mqttClient.subscribe(mqtt_sub_queue);
+      mqttClient.subscribe(mqtt_sub_ack);
+
     } else {
       Serial.print(F("Failed to connect to MQTT with status code: "));
       Serial.println(mqttClient.state());
@@ -161,14 +168,26 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++){
     messageTemp += (char)payload[i];
   }
-  Serial.print("MQTT: ");
-  Serial.println(messageTemp);
+//  Serial.println(topic);
+//  Serial.print("size topic: ");
+//  Serial.println(SIZEOF(topic));
+//  Serial.println(mqtt_sub_ack);
+//  Serial.print("size ack: ");
+//  Serial.println(SIZEOF(mqtt_sub_ack));
+  if (strncmp(topic, mqtt_sub_ack, SIZEOF(mqtt_sub_ack)) == 0) {
+    digitalWrite(BUZZER_PIN, LOW);
+    return;
+  }
 
+  Serial.println("Receive mqtt");
   if (strncmp(DEVICE_UUID, messageTemp.c_str(), length) == 0) {
-    Serial.println("COMPARE TRUE");
+    Serial.println("TRUE");
     digitalWrite(vibrationdc, HIGH);
     motorActive = true;
     motorStartTime = millis();
+  } else {
+    Serial.println("FALSE");
+    digitalWrite(vibrationdc, LOW);
   }
 
 }
@@ -245,6 +264,7 @@ void falldown() {
   }
 
   if (fall == true) { // In the event of a fall detection
+    digitalWrite(BUZZER_PIN, HIGH);
     memset(bleBeacons, 0, sizeof(bleBeacons));
     pBLEScan->start(3, false);
 
@@ -319,6 +339,8 @@ void setup() {
   mqttClient.setCallback(onMqttMessage);
 
   pinMode(vibrationdc, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
   digitalWrite(vibrationdc, LOW);
 }
 
@@ -332,10 +354,10 @@ void loop() {
   nb_delay(falldown, prev_time_acce, SAMPLE_INTERVAL_MS);
 
   //Turn off motor after the set duration
-  if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
-    digitalWrite(vibrationdc, LOW);
-    motorActive = false;
-  }
+//  if(motorActive && (millis() - motorStartTime >= motorVibrationDuration)){
+//    digitalWrite(vibrationdc, LOW);
+//    motorActive = false;
+//  }
 
   // clear BLEScan buffer to release memory
   pBLEScan->clearResults();
