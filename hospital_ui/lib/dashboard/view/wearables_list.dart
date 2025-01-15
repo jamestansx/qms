@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qms_staff/dashboard/bloc/wearable_bloc.dart';
+import 'package:qms_staff/dashboard/view/add_wearables_dialog.dart';
 
 class WearablesList extends StatefulWidget {
   const WearablesList({super.key});
@@ -39,16 +40,36 @@ class _WearablesListState extends State<WearablesList> {
               alertDevice.remove(state.alertDevice!);
             }
             return SizedBox(
-                width: MediaQuery.of(context).size.width * 0.25,
+              width: MediaQuery.of(context).size.width * 0.25,
               child: Column(
                 children: [
-                  const Text(
-                    "Device List",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                      wordSpacing: 0.5,
-                    ),
+                  Row(
+                    children: [
+                      const Text(
+                        "Device List",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          wordSpacing: 0.5,
+                        ),
+                      ),
+                      Spacer(),
+                      IconButton.outlined(
+                        onPressed: () async {
+                          final load = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => AddWearableDialog(),
+                          );
+                          if (!context.mounted) return;
+                          if (load ?? false) {
+                            context
+                                .read<WearableBloc>()
+                                .add(WearablesFetched());
+                          }
+                        },
+                        icon: Icon(Icons.add),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   Expanded(

@@ -58,10 +58,21 @@ class WearablesRepo extends DioClient {
     }
   }
 
-
   Future<void> ackFall() async {
     try {
       await dio.get("/wearables/fallack");
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  Future<String> register(String deviceName) async {
+    try {
+      Response response = await dio.post("/wearables/register", data: {
+        "device_name": deviceName,
+      });
+
+      return response.data;
     } catch (_) {
       rethrow;
     }
