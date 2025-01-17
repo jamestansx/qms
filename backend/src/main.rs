@@ -24,6 +24,7 @@ mod models;
 mod queue;
 mod routes;
 mod states;
+mod test;
 
 async fn init_db(db_uri: &str) -> Result<SqlitePool, sqlx::Error> {
     let opts = SqliteConnectOptions::from_str(db_uri)?.create_if_missing(true);
