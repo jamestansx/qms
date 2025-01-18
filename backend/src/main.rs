@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         loop {
             if let Ok(recv) = rx.try_recv() {
                 if let Some(recv) = recv.map(|x| x.1) {
-                    tracing::warn!("receive {recv:?}");
+                    tracing::info!("queue/status: publish {recv:?}");
                     cl.publish(
                         "queue/status",
                         QoS::AtMostOnce,
@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .await
                     .ok();
                 } else {
-                    tracing::warn!("receive NONE");
+                    tracing::info!("receive NONE");
                     cl.publish("queue/status", QoS::AtMostOnce, false, "NONE")
                         .await
                         .ok();

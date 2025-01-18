@@ -115,8 +115,7 @@ fn update_queue(
                 wearable_uuid,
             },
             QueuePriority {
-                current: read.is_none()
-                    || *read == Some(queue_no),
+                current: read.is_none() || *read == Some(queue_no),
                 queue_no,
                 age,
                 appointment_time_utc: scheduled_at_utc,
@@ -166,7 +165,6 @@ pub async fn verify_queue(
     )
     .fetch_one(&state.db)
     .await?;
-
 
     let patient: PatientModel = query_as(
         "SELECT * FROM patients
